@@ -9,12 +9,10 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 
-#header = st.container()
-#dataset = st.container()
-#plots = st.container()
-#kw_search = st.container()
-#common = st.container()
-header, kw_search, common = st.tabs(["Main data", "Text Search", "Word Cloud"])
+st.caption('**Please note the controls are on the sidebar**')
+
+# initializing containers
+header, dataset, kw_search, common = st.tabs(["Introduction","Main data", "Text Search", "Word Cloud"])
 
 @st.experimental_memo
 def call_dataset(game_name):
@@ -90,10 +88,21 @@ def func_keyword(df,key):
 
 with header:
 	st.title("Sentiment of gamers' pre-release tweets on main series Pokémon games")
-	st.caption('**Please note the controls are on the sidebar**')
-	st.markdown('This is a web app that displays tweets and their sentiment on the selected Pokémon game')
+	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.
+					
+With over 60 million copies sold in the past fiscal year (FY2022) alone, Pokémon games are amongst the most well-known games in the gaming industry. Sentiment analysis of the hype surrounding these games offers a wealth of information that may be helpful towards advertisers and retailers. 
 
-#with dataset:
+For advertisers, sentiment analysis is a great tool for deciding which games to market and promote, it can assist with brand monitoring by examining both the quantity and quality of brand mentions. Because the intended game to be advertised is Pokémon, a multibillion-dollar franchise, the popularity of the games alone guarantees millions of sales, however if the general sentiment for the new games is negative or there is not enough positive hype towards the games then sales numbers can be significantly impacted. Using the data, advertisers can determine when they should advertise to regenerate hype.
+
+Before a game is released, retailers can learn how the game is being accepted through sentiment analysis. When pre-orders are open, if the anticipation and sentiment surrounding the game is good, retailers and e-commerce websites can highlight or promote it to secure more sales. If a game receives negative reactions, they can remove it from their list of suggestions or promote a better anticipated game to maximize those sales.
+
+Additionally, game developers can also use this data to determine the popularity and sentiment of a feature or game mechanic they have revealed by searching for keywords in the tweets. This lets them to choose which mechanic to focus on, where to improve, and even what to scrap. 
+
+Using a pre-trained sentiment analysis model trained on tweets, sentiment analysis can help the professionals involved in making and selling video games make better products, satisfying both customers and shareholders.
+""")
+
+
+with dataset:
 	games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 				  'Pokémon Sun & Moon', 'Pokémon Ultra Sun & Ultra Moon',
 				  "Pokémon Let's Go, Pikachu! and Let's Go, Eevee!",
@@ -139,8 +148,8 @@ with header:
 	filtered_df = func_filtered_df(game_dataset_clean,options_sentiment)
 	st.dataframe(filtered_df)
 
-	# fig1. sentiment per day
-	st.header(f"Sentiment on {game_name} per day")
+	# fig1. sentiment over time
+	st.header(f"Sentiment on {game_name} over time")
 	slider_df = slider_df[slider_df["sentiment"].isin(options_sentiment)]
 	fig = px.line(slider_df, x='date', y='size', labels={
 		'date':'Date',
@@ -151,7 +160,7 @@ with header:
 		#['red', 'blue', 'green']
 	st.write(fig)
 
-	# fig2. normalized sentiment area per day
+	# fig2. normalized sentiment area over time
 	sentiment_total_pd = slider_df.groupby(['date'], as_index=False).sum()
 	spd = slider_df.merge(sentiment_total_pd, left_on = 'date', right_on='date')
 	spd['sentiment percentage'] = spd['size_x']/spd['size_y']
@@ -159,7 +168,7 @@ with header:
 		'date':'Date',
 		'sentiment percentage':'Sentiment (%)',
 		'sentiment':'Sentiment'},
-		title='Normalized sentiment per day', color='sentiment',
+		title='Normalized sentiment over time', color='sentiment',
 		color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
 	st.write(fig2)
 
