@@ -61,11 +61,25 @@ def call_dataset(game_name):
 	data.reset_index(drop=True, inplace=True)
 	return data
 
-# def create_timeseries_plot:
-# 	return
+@st.experimental_memo
+def func_sentiment_per_day(df):
+	df = df.groupby(['sentiment','date'], as_index=False).size()
+	return df
 
-# def create_area_plot:
+@st.experimental_memo
+def func_slider_df_size(df,date_range):
+	df = df[df['date'].between(date_range[0],date_range[1],inclusive=True)]
+	return df
 
+@st.experimental_memo
+def func_slider_df_all(df,date_range):
+	df = df[df['date'].between(date_range[0],date_range[1],inclusive=True)]
+	return df
+
+@st.experimental_memo
+def func_filtered_df(df):
+	df = df[df["sentiment"].isin(options_sentiment)]
+	return df
 
 with header:
 	st.title("Sentiment of gamers' pre-release tweets on main series Pokémon games")
@@ -95,19 +109,18 @@ with dataset:
 	game_dataset = call_dataset(games_dict[game_name])
 
 	# grouping sentiment per date
-	sentiment_per_day = game_dataset.groupby(['sentiment','date'], as_index=False).size()
+	sentiment_per_day = func_sentiment_per_day(game_dataset)
 	min_date = sentiment_per_day['date'].min()
 	max_date = sentiment_per_day['date'].max()
 
+	# add a slider for user to input
 	### SIDEBAR
 	date_range = st.sidebar.slider('Please select the range of dates:', min_date, max_date, (min_date, max_date))
-
-	# add a slider for user to input
-	slider_df = sentiment_per_day[sentiment_per_day['date'].between(date_range[0],date_range[1],inclusive=True)]
+	slider_df = func_slider_df_size(sentiment_per_day,date_range)
 
 with plots:
 	# creates a dataframe of tweets created between dates chosen
-	date_range_df = game_dataset[game_dataset['date'].between(date_range[0],date_range[1],inclusive=True)]
+	date_range_df = func_slider_df_all(game_dataset,date_range)
 	st.text(f'Tweets from {date_range[0]} to {date_range[1]}')
 	game_dataset_clean = date_range_df[['text','date','sentiment scores','sentiment']]
 
@@ -116,7 +129,7 @@ with plots:
 	options_sentiment = st.sidebar.multiselect(label='Filter by sentiment (dropdown):',
 		options=['Positive', 'Neutral', 'Negative'],
 		default=['Positive', 'Neutral', 'Negative'])
-	filtered_df = game_dataset_clean[game_dataset_clean["sentiment"].isin(options_sentiment)]
+	filtered_df = func_filtered_df(game_dataset_clean)
 	st.dataframe(filtered_df)
 
 	# fig1. sentiment per day
