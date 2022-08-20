@@ -9,10 +9,12 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 
-st.caption('**Please note the controls are on the sidebar**')
+st.caption('**Please note the control panel is on the sidebar**')
 
 # initializing containers
-header, dataset, kw_search, common = st.tabs(["Introduction","Main data", "Text Search", "Word Cloud"])
+dataset, kw_search, header = st.tabs(["Data Plots", "Text Search", "About"])
+common = st.container()
+inputs = st.form(key='form',clear_on_submit=True)
 
 @st.experimental_memo
 def call_dataset(game_name):
@@ -85,7 +87,6 @@ def func_keyword(df,key):
 	df =  df[df['text'].str.contains(pat=key, case=False)==True]
 	return df
 
-
 with header:
 	st.title("Sentiment of gamers' pre-release tweets on main series Pokémon games")
 	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.
@@ -116,7 +117,7 @@ with dataset:
 
 	# a dropdown for the user to choose the game to be displayed
 	### SIDEBAR
-	st.sidebar.markdown("# Controls")
+	st.sidebar.markdown("# Control Panel")
 	game_name = st.sidebar.selectbox('Select a game to display:', games_list)
 	
 	st.header(f'Tweets on {game_name}')
@@ -129,22 +130,52 @@ with dataset:
 	min_date = sentiment_per_day['date'].min()
 	max_date = sentiment_per_day['date'].max()
 
+	# initializing session state
+	if 'dateinput1' not in st.session_state:
+		st.session_state['dateinput1'] = min_date
+		st.session_state['dateinput2'] = max_date
+		st.session_state['opsentiment'] = ['Positive', 'Neutral', 'Negative']
+
 	# add a slider for user to input
 	### SIDEBAR
-	date_range = st.sidebar.slider('Please select the range of dates:', min_date, max_date, (min_date, max_date))
+	# date_range = st.sidebar.slider('Please select the range of dates:', min_date, max_date, (min_date, max_date))
+	date_range = list([0,0])
+	# date_range[0] = st.sidebar.date_input('Select starting date:', min_date, min_date, max_date)
+	# date_range[1] = st.sidebar.date_input('Select end date:', max_date,date_range[0],max_date)
+with inputs:
+	with st.sidebar:
+		date_range[0] = st.date_input('Select starting date:', min_date, min_date, max_date,key='dateinput1')
+		date_range[1] = st.date_input('Select end date:', max_date,date_range[0],max_date,key='dateinput2')
+
+		options_sentiment = st.multiselect(label='Filter by sentiment (dropdown):',
+			options=['Positive', 'Neutral', 'Negative'],
+			default=['Positive', 'Neutral', 'Negative'],
+			key='opsentiment')
+
+		submitted = st.form_submit_button("Submit")
+		if submitted:
+			st.write("Submitted")
+
+def clear_inputs():
+	st.session_state['dateinput1'] = min_date
+	st.session_state['dateinput2'] = max_date
+	st.session_state['opsentiment'] = ['Positive', 'Neutral', 'Negative']
+	return
+
+with dataset:
+	# # check state
+	# st.session_state
+
+	#create your button to clear the state of the multiselect
+	st.sidebar.button("Reset Values", on_click=clear_inputs)
+
 	slider_df = func_slider_df_size(sentiment_per_day,date_range)
 
-#with plots:
 	# creates a dataframe of tweets created between dates chosen
 	date_range_df = func_slider_df_all(game_dataset,date_range)
 	st.text(f'Tweets from {date_range[0]} to {date_range[1]}')
 	game_dataset_clean = date_range_df[['text','date','sentiment scores','sentiment']]
 
-	# option to filter by sentiment
-	### SIDEBAR
-	options_sentiment = st.sidebar.multiselect(label='Filter by sentiment (dropdown):',
-		options=['Positive', 'Neutral', 'Negative'],
-		default=['Positive', 'Neutral', 'Negative'])
 	filtered_df = func_filtered_df(game_dataset_clean,options_sentiment)
 	st.dataframe(filtered_df)
 
@@ -172,43 +203,44 @@ with dataset:
 		color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
 	st.write(fig2)
 
-	# area plot
+# with kw_search:
 
-	# fig_area = px.area(slider_df, x='date', y='size', title='sentiment area per day',
-	# 	color='sentiment', color_discrete_sequence=['#DC3912', '#3366CC', '#109618']) #['red', 'blue', 'green']
-	
-	# st.write(fig_area)
+# 	# search text in dataframe
+# 	### SIDEBAR
+# 	keyword_text = st.text_input('Search text within the date range (case insensitive):')
+# 	if keyword_text:
+# 		st.caption(f'The current text search is: {keyword_text}')
+# 	else:
+# 		st.caption(f'No text search input')
 
-with kw_search:
+# 	if keyword_text:
+# 		keyword_df = func_keyword(date_range_df,keyword_text)
+# 		st.header('Text Search')
+# 		st.write(f'Tweets with "{keyword_text}"')
+# 		st.dataframe(keyword_df[['text','date','sentiment scores','sentiment']])
 
-	# search text in dataframe
-	### SIDEBAR
-	keyword_text = st.text_input('Search text within the date range (case insensitive):')
-	if keyword_text:
-		st.caption(f'The current text search is: {keyword_text}')
-	else:
-		st.caption(f'No text search input')
+# 		keyword_per_day = keyword_df.groupby(['sentiment','date'], as_index=False).size()
+# 		filtered_kpd = func_filtered_df(keyword_per_day,options_sentiment)
+# 		fig_kw = px.line(filtered_kpd, x='date', y='size',
+# 			title=f'Number of tweets with "{keyword_text}" and their sentiment over time', color='sentiment',
+# 			color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
+# 			#['red', 'blue', 'green']
+# 		st.write(fig_kw)
 
-	if keyword_text:
-		keyword_df = func_keyword(date_range_df,keyword_text)
-		st.header('Text Search')
-		st.write(f'Tweets with "{keyword_text}"')
-		st.dataframe(keyword_df[['text','date','sentiment scores','sentiment']])
-
-		keyword_per_day = keyword_df.groupby(['sentiment','date'], as_index=False).size()
-		filtered_kpd = func_filtered_df(keyword_per_day,options_sentiment)
-		fig_kw = px.line(filtered_kpd, x='date', y='size',
-			title=f'Number of tweets with "{keyword_text}" and their sentiment over time', color='sentiment',
-			color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
-			#['red', 'blue', 'green']
-		st.write(fig_kw)
+# 		k_total_pd = filtered_kpd.groupby(['date'], as_index=False).sum()
+# 		kpd = filtered_kpd.merge(k_total_pd, left_on = 'date', right_on='date')
+# 		kpd['sentiment percentage'] = kpd['size_x']/kpd['size_y']
+# 		fig_kw2 = px.area(kpd, x='date', y='sentiment percentage',labels={
+# 			'date':'Date',
+# 			'sentiment percentage':'Sentiment (%)',
+# 			'sentiment':'Sentiment'},
+# 			title='Normalized sentiment over time', color='sentiment',
+# 			color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
+# 		st.write(fig_kw2)
 
 with common:
-	# most common words
+	dataset_text = ' '.join(date_range_df['preprocessed tweets'])
 
-	most_common_words = Counter(" ".join(game_dataset["text"]).split()).most_common(100)
-
-	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
 	# remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
 	# 				'X','Y','x','y','Sun','Moon','SunMoon','PokemonSunMoon',
 	# 				'Alpha','Sapphire','Omega', 'Ruby','ORAS',
@@ -218,11 +250,12 @@ with common:
 	# 	dataset_text = dataset_text.replace(word,'')
 
 	fig_word, ax = plt.subplots()
+
 	wordcloud = WordCloud(background_color='white', colormap='Set2',
 				collocations=False, stopwords = STOPWORDS).generate(dataset_text)
 
-	st.header('Word cloud of most common words')
+	st.sidebar.header('Word cloud of most common words')
 	plt.imshow(wordcloud, interpolation='bilinear')
 	plt.axis("off")
 	plt.show()
-	st.pyplot(fig_word)
+	st.sidebar.pyplot(fig_word)
