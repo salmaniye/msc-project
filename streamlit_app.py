@@ -9,11 +9,12 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 
-header = st.container()
-dataset = st.container()
-plots = st.container()
-kw_search = st.container()
-common = st.container()
+#header = st.container()
+#dataset = st.container()
+#plots = st.container()
+#kw_search = st.container()
+#common = st.container()
+header, kw_search, common = st.tabs(["Main data", "Text Search", "Word Cloud"])
 
 @st.experimental_memo
 def call_dataset(game_name):
@@ -77,16 +78,22 @@ def func_slider_df_all(df,date_range):
 	return df
 
 @st.experimental_memo
-def func_filtered_df(df):
+def func_filtered_df(df,options_sentiment):
 	df = df[df["sentiment"].isin(options_sentiment)]
 	return df
+
+@st.experimental_memo
+def func_keyword(df,key):
+	df =  df[df['text'].str.contains(pat=key, case=False)==True]
+	return df
+
 
 with header:
 	st.title("Sentiment of gamers' pre-release tweets on main series Pokémon games")
 	st.caption('**Please note the controls are on the sidebar**')
 	st.markdown('This is a web app that displays tweets and their sentiment on the selected Pokémon game')
 
-with dataset:
+#with dataset:
 	games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 				  'Pokémon Sun & Moon', 'Pokémon Ultra Sun & Ultra Moon',
 				  "Pokémon Let's Go, Pikachu! and Let's Go, Eevee!",
@@ -118,7 +125,7 @@ with dataset:
 	date_range = st.sidebar.slider('Please select the range of dates:', min_date, max_date, (min_date, max_date))
 	slider_df = func_slider_df_size(sentiment_per_day,date_range)
 
-with plots:
+#with plots:
 	# creates a dataframe of tweets created between dates chosen
 	date_range_df = func_slider_df_all(game_dataset,date_range)
 	st.text(f'Tweets from {date_range[0]} to {date_range[1]}')
@@ -129,7 +136,7 @@ with plots:
 	options_sentiment = st.sidebar.multiselect(label='Filter by sentiment (dropdown):',
 		options=['Positive', 'Neutral', 'Negative'],
 		default=['Positive', 'Neutral', 'Negative'])
-	filtered_df = func_filtered_df(game_dataset_clean)
+	filtered_df = func_filtered_df(game_dataset_clean,options_sentiment)
 	st.dataframe(filtered_df)
 
 	# fig1. sentiment per day
@@ -145,8 +152,8 @@ with plots:
 	st.write(fig)
 
 	# fig2. normalized sentiment area per day
-	sentiment_total_pd = sentiment_per_day.groupby(['date'], as_index=False).sum()
-	spd = sentiment_per_day.merge(sentiment_total_pd, left_on = 'date', right_on='date')
+	sentiment_total_pd = slider_df.groupby(['date'], as_index=False).sum()
+	spd = slider_df.merge(sentiment_total_pd, left_on = 'date', right_on='date')
 	spd['sentiment percentage'] = spd['size_x']/spd['size_y']
 	fig2 = px.area(spd, x='date', y='sentiment percentage',labels={
 		'date':'Date',
@@ -163,23 +170,29 @@ with plots:
 	
 	# st.write(fig_area)
 
-# with kw_search:
+with kw_search:
 
-# 	# search keyword in dataframe
-# 	### SIDEBAR
-# 	keyword = st.sidebar.text_input('Search keyword within the date range (case insensitive):')
-# 	st.sidebar.markdown(f'The current keyword is: {keyword}')
+	# search text in dataframe
+	### SIDEBAR
+	keyword_text = st.text_input('Search text within the date range (case insensitive):')
+	if keyword_text:
+		st.caption(f'The current text search is: {keyword_text}')
+	else:
+		st.caption(f'No text search input')
 
+	if keyword_text:
+		keyword_df = func_keyword(date_range_df,keyword_text)
+		st.header('Text Search')
+		st.write(f'Tweets with "{keyword_text}"')
+		st.dataframe(keyword_df[['text','date','sentiment scores','sentiment']])
 
-# 	keyword_df = date_range_df[date_range_df['text'].str.contains(pat=keyword, case=False)==True]
-# 	st.dataframe(keyword_df)
-
-# 	keyword_per_day = keyword_df.groupby(['sentiment','date'], as_index=False).size()
-# 	fig_kw = px.line(slider_df, x='date', y='size',
-# 		title=f'Number of tweets with "{keyword}" and their sentiment over time', color='sentiment',
-# 		color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
-# 		#['red', 'blue', 'green']
-# 	st.write(fig_kw)
+		keyword_per_day = keyword_df.groupby(['sentiment','date'], as_index=False).size()
+		filtered_kpd = func_filtered_df(keyword_per_day,options_sentiment)
+		fig_kw = px.line(filtered_kpd, x='date', y='size',
+			title=f'Number of tweets with "{keyword_text}" and their sentiment over time', color='sentiment',
+			color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
+			#['red', 'blue', 'green']
+		st.write(fig_kw)
 
 with common:
 	# most common words
