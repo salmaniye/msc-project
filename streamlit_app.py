@@ -188,7 +188,8 @@ with dataset:
 		filtered_df = func_keyword(filtered_df,keyword_text)
 
 	# fig1. sentiment over time
-	st.subheader(f"Sentiment on {game_name} over time")
+	st.markdown(f"<h5 style='text-align: center;'>Sentiment on {game_name} over time</h5>", unsafe_allow_html=True)
+	# st.subheader(f"Sentiment on {game_name} over time")
 	slider_df = slider_df[slider_df["sentiment"].isin(options_sentiment)]
 
 	fig = px.line(slider_df, x='date', y='size', labels={
@@ -211,14 +212,15 @@ with dataset:
 		'sentiment percentage':'Sentiment (%)',
 		'sentiment':'Sentiment'},
 		color='sentiment',
-		color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
+		color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'},
+		category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
 	fig2.update_layout(title_text="Normalized sentiment over time", title_x=0.5)
 	with col2:
 		st.write(fig2)
 
 with common:
 	# display tweets
-	st.subheader(f'Tweets on {game_name}')
+	st.markdown(f"<h5 style='text-align: center;'>Tweets on {game_name}</h5>", unsafe_allow_html=True)
 	st.dataframe(filtered_df)
 
 	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
