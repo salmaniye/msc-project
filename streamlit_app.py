@@ -9,13 +9,15 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 
-st.caption('**Please note the control panel is on the sidebar**')
+st.set_page_config(layout="wide")
 
 # initializing containers
-dataset, kw_search, header = st.tabs(["Data Plots", "Text Search", "About"])
-common = st.container()
+dataset, header = st.tabs(["Data Plots", "About"])
 inputs = st.form(key='form',clear_on_submit=True)
+col1, col2 = st.columns(2)
+common = st.container()
 
+# functions
 @st.experimental_memo
 def call_dataset(game_name):
 	# load data
@@ -90,20 +92,12 @@ def func_keyword(df,key):
 with header:
 	st.title("Sentiment of gamers' pre-release tweets on main series Pokémon games")
 	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.
-					
-With over 60 million copies sold in the past fiscal year (FY2022) alone, Pokémon games are amongst the most well-known games in the gaming industry. Sentiment analysis of the hype surrounding these games offers a wealth of information that may be helpful towards advertisers and retailers. 
 
-For advertisers, sentiment analysis is a great tool for deciding which games to market and promote, it can assist with brand monitoring by examining both the quantity and quality of brand mentions. Because the intended game to be advertised is Pokémon, a multibillion-dollar franchise, the popularity of the games alone guarantees millions of sales, however if the general sentiment for the new games is negative or there is not enough positive hype towards the games then sales numbers can be significantly impacted. Using the data, advertisers can determine when they should advertise to regenerate hype.
-
-Before a game is released, retailers can learn how the game is being accepted through sentiment analysis. When pre-orders are open, if the anticipation and sentiment surrounding the game is good, retailers and e-commerce websites can highlight or promote it to secure more sales. If a game receives negative reactions, they can remove it from their list of suggestions or promote a better anticipated game to maximize those sales.
-
-Additionally, game developers can also use this data to determine the popularity and sentiment of a feature or game mechanic they have revealed by searching for keywords in the tweets. This lets them to choose which mechanic to focus on, where to improve, and even what to scrap. 
-
-Using a pre-trained sentiment analysis model trained on tweets, sentiment analysis can help the professionals involved in making and selling video games make better products, satisfying both customers and shareholders.
-""")
+place holder""")
 
 
 with dataset:
+	st.caption('**Please note the control panel is on the sidebar**')
 	games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 				  'Pokémon Sun & Moon', 'Pokémon Ultra Sun & Ultra Moon',
 				  "Pokémon Let's Go, Pikachu! and Let's Go, Eevee!",
@@ -119,8 +113,6 @@ with dataset:
 	### SIDEBAR
 	st.sidebar.markdown("# Control Panel")
 	game_name = st.sidebar.selectbox('Select a game to display:', games_list)
-	
-	st.header(f'Tweets on {game_name}')
 	st.sidebar.caption(f'You have selected: {game_name}')
 
 	game_dataset = call_dataset(games_dict[game_name])
@@ -135,13 +127,13 @@ with dataset:
 		st.session_state['dateinput1'] = min_date
 		st.session_state['dateinput2'] = max_date
 		st.session_state['opsentiment'] = ['Positive', 'Neutral', 'Negative']
+		st.session_state['kw_s'] = ""
 
-	# add a slider for user to input
+	# date input
 	### SIDEBAR
 	# date_range = st.sidebar.slider('Please select the range of dates:', min_date, max_date, (min_date, max_date))
 	date_range = list([0,0])
-	# date_range[0] = st.sidebar.date_input('Select starting date:', min_date, min_date, max_date)
-	# date_range[1] = st.sidebar.date_input('Select end date:', max_date,date_range[0],max_date)
+
 with inputs:
 	with st.sidebar:
 		date_range[0] = st.date_input('Select starting date:', min_date, min_date, max_date,key='dateinput1')
@@ -152,6 +144,13 @@ with inputs:
 			default=['Positive', 'Neutral', 'Negative'],
 			key='opsentiment')
 
+		keyword_text = st.text_input('Search text within the date range (case insensitive):', key='kw_s')
+		if keyword_text:
+			st.caption(f'The current text search is: {keyword_text}')
+		else:
+			st.caption(f'No text search input')
+
+		# submit button
 		submitted = st.form_submit_button("Submit")
 		if submitted:
 			st.write("Submitted")
@@ -160,6 +159,7 @@ def clear_inputs():
 	st.session_state['dateinput1'] = min_date
 	st.session_state['dateinput2'] = max_date
 	st.session_state['opsentiment'] = ['Positive', 'Neutral', 'Negative']
+	st.session_state['kw_s'] = ""
 	return
 
 with dataset:
@@ -169,27 +169,38 @@ with dataset:
 	#create your button to clear the state of the multiselect
 	st.sidebar.button("Reset Values", on_click=clear_inputs)
 
+	if keyword_text:
+		game_dataset = func_keyword(game_dataset,keyword_text)
+
+	sentiment_per_day = func_sentiment_per_day(game_dataset )
 	slider_df = func_slider_df_size(sentiment_per_day,date_range)
 
+	
 	# creates a dataframe of tweets created between dates chosen
 	date_range_df = func_slider_df_all(game_dataset,date_range)
 	st.text(f'Tweets from {date_range[0]} to {date_range[1]}')
+
 	game_dataset_clean = date_range_df[['text','date','sentiment scores','sentiment']]
 
 	filtered_df = func_filtered_df(game_dataset_clean,options_sentiment)
-	st.dataframe(filtered_df)
+	# search text in dataframe
+	if keyword_text:
+		filtered_df = func_keyword(filtered_df,keyword_text)
 
 	# fig1. sentiment over time
-	st.header(f"Sentiment on {game_name} over time")
+	st.subheader(f"Sentiment on {game_name} over time")
 	slider_df = slider_df[slider_df["sentiment"].isin(options_sentiment)]
+
 	fig = px.line(slider_df, x='date', y='size', labels={
 		'date':'Date',
 		'size':'Number of tweets',
 		'sentiment':'Sentiment'},
-		title='Number of tweets and their sentiment over time', color='sentiment',
+		color='sentiment',
 		color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'}) 
 		#['red', 'blue', 'green']
-	st.write(fig)
+	fig.update_layout(title_text="Number of tweets and their sentiment over time", title_x=0.5)
+	with col1:
+		st.write(fig)
 
 	# fig2. normalized sentiment area over time
 	sentiment_total_pd = slider_df.groupby(['date'], as_index=False).sum()
@@ -199,47 +210,18 @@ with dataset:
 		'date':'Date',
 		'sentiment percentage':'Sentiment (%)',
 		'sentiment':'Sentiment'},
-		title='Normalized sentiment over time', color='sentiment',
+		color='sentiment',
 		color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
-	st.write(fig2)
-
-# with kw_search:
-
-# 	# search text in dataframe
-# 	### SIDEBAR
-# 	keyword_text = st.text_input('Search text within the date range (case insensitive):')
-# 	if keyword_text:
-# 		st.caption(f'The current text search is: {keyword_text}')
-# 	else:
-# 		st.caption(f'No text search input')
-
-# 	if keyword_text:
-# 		keyword_df = func_keyword(date_range_df,keyword_text)
-# 		st.header('Text Search')
-# 		st.write(f'Tweets with "{keyword_text}"')
-# 		st.dataframe(keyword_df[['text','date','sentiment scores','sentiment']])
-
-# 		keyword_per_day = keyword_df.groupby(['sentiment','date'], as_index=False).size()
-# 		filtered_kpd = func_filtered_df(keyword_per_day,options_sentiment)
-# 		fig_kw = px.line(filtered_kpd, x='date', y='size',
-# 			title=f'Number of tweets with "{keyword_text}" and their sentiment over time', color='sentiment',
-# 			color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
-# 			#['red', 'blue', 'green']
-# 		st.write(fig_kw)
-
-# 		k_total_pd = filtered_kpd.groupby(['date'], as_index=False).sum()
-# 		kpd = filtered_kpd.merge(k_total_pd, left_on = 'date', right_on='date')
-# 		kpd['sentiment percentage'] = kpd['size_x']/kpd['size_y']
-# 		fig_kw2 = px.area(kpd, x='date', y='sentiment percentage',labels={
-# 			'date':'Date',
-# 			'sentiment percentage':'Sentiment (%)',
-# 			'sentiment':'Sentiment'},
-# 			title='Normalized sentiment over time', color='sentiment',
-# 			color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'})
-# 		st.write(fig_kw2)
+	fig2.update_layout(title_text="Normalized sentiment over time", title_x=0.5)
+	with col2:
+		st.write(fig2)
 
 with common:
-	dataset_text = ' '.join(date_range_df['preprocessed tweets'])
+	# display tweets
+	st.subheader(f'Tweets on {game_name}')
+	st.dataframe(filtered_df)
+
+	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
 
 	# remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
 	# 				'X','Y','x','y','Sun','Moon','SunMoon','PokemonSunMoon',
