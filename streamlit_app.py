@@ -13,7 +13,7 @@ st.set_page_config(layout="wide")
 
 # initializing containers
 with st.sidebar:
-	input_container, header, word_cloud = st.tabs(["Controls", "About", "WordCloud"])
+	input_container, word_cloud,  header = st.tabs(["Controls", "WordCloud", "About"])
 
 dataset = st.container()
 col1, col2 = st.columns(2)
@@ -94,10 +94,11 @@ def func_keyword(df,key):
 
 
 with header:
-	st.title("Sentiment of gamers' pre-release tweets on main series Pokémon games")
+	st.title("Sentiment of pre-release tweets on main series Pokémon games")
 	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.
 
 place holder""")
+
 games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 			  'Pokémon Sun & Moon', 'Pokémon Ultra Sun & Ultra Moon',
 			  "Pokémon Let's Go, Pikachu! and Let's Go, Eevee!",
@@ -118,7 +119,7 @@ with input_container:
 game_dataset = call_dataset(games_dict[game_name])
 
 with input_container:
-	inputs = st.form(key='form',clear_on_submit=True)
+	inputs = st.form(key='form',clear_on_submit=False)
 
 # grouping sentiment per date
 sentiment_per_day = func_sentiment_per_day(game_dataset)
@@ -126,13 +127,6 @@ min_date = sentiment_per_day['date'].min()
 max_date = sentiment_per_day['date'].max()
 
 date_range = list([0,0])
-
-# initializing session state
-if 'dateinput1' not in st.session_state:
-	st.session_state['dateinput1'] = min_date
-	st.session_state['dateinput2'] = max_date
-	st.session_state['opsentiment'] = ['Positive', 'Neutral', 'Negative']
-	st.session_state['kw_s'] = ""
 
 # function for clearing inputs by restting session states
 def clear_inputs():
@@ -162,12 +156,15 @@ with inputs:
 
 	# submit button
 	submitted = st.form_submit_button("Submit")
+
 	if submitted:
 		st.write("Submitted")
+	#create your button to clear the state of the multiselect
+
 
 with input_container:
-	#create your button to clear the state of the multiselect
-	st.button("Reset Values", on_click=clear_inputs)
+	st.button("Reset options to default values", on_click=clear_inputs)
+
 
 if keyword_text:
 	game_dataset = func_keyword(game_dataset,keyword_text)
@@ -190,7 +187,7 @@ fig = px.line(slider_df, x='date', y='size', labels={
 	'size':'Number of tweets',
 	'sentiment':'Sentiment'},
 	color='sentiment',
-	color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'}) 
+	color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'}) 
 	#['red', 'blue', 'green']
 fig.update_layout(title_text="Number of tweets and their sentiment over time", title_x=0.5)
 
@@ -203,12 +200,12 @@ fig2 = px.area(spd, x='date', y='sentiment percentage',labels={
 	'sentiment percentage':'Sentiment (%)',
 	'sentiment':'Sentiment'},
 	color='sentiment',
-	color_discrete_map={'Negative':'#DC3912','Neutral':'#3366CC','Positive':'#109618'},
+	color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'},
 	category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
 fig2.update_layout(title_text="Normalized sentiment over time", title_x=0.5)
 
 with dataset:
-	st.markdown(f"<h3 style='text-align: center;'>Sentiment of gamers' pre-release tweets on main series Pokémon games</h3>", unsafe_allow_html=True)
+	st.markdown(f"<h3 style='text-align: center;'>Sentiment of pre-release tweets on main series Pokémon games</h3>", unsafe_allow_html=True)
 	st.caption('**Please note the control panel is on the sidebar**')
 	st.text(f'Tweets from {date_range[0]} to {date_range[1]}')
 	with col1:
@@ -221,24 +218,24 @@ with common:
 	st.markdown(f"<h5 style='text-align: center;'>Tweets on {game_name}</h5>", unsafe_allow_html=True)
 	st.dataframe(filtered_df)
 
-with word_cloud:
-	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
+# with word_cloud:
+# 	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
+# 	# dataset_text = ''.join(ch for ch in string_value if ch.isalnum())
+# 	# remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
+# 	# 				'X','Y','x','y','Sun','Moon','SunMoon','PokemonSunMoon',
+# 	# 				'Alpha','Sapphire','Omega', 'Ruby','ORAS',
+# 	# 				'user']
 
-	# remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
-	# 				'X','Y','x','y','Sun','Moon','SunMoon','PokemonSunMoon',
-	# 				'Alpha','Sapphire','Omega', 'Ruby','ORAS',
-	# 				'user']
+# 	# for word in remove_words:
+# 	# 	dataset_text = dataset_text.replace(word,'')
 
-	# for word in remove_words:
-	# 	dataset_text = dataset_text.replace(word,'')
+# 	fig_word, ax = plt.subplots()
 
-	fig_word, ax = plt.subplots()
+# 	wordcloud = WordCloud(background_color='white', colormap='Set2',
+# 				collocations=False, stopwords = STOPWORDS).generate(dataset_text)
 
-	wordcloud = WordCloud(background_color='white', colormap='Set2',
-				collocations=False, stopwords = STOPWORDS).generate(dataset_text)
-
-	st.sidebar.header('Word cloud of most common words')
-	plt.imshow(wordcloud, interpolation='bilinear')
-	plt.axis("off")
-	plt.show()
-	st.sidebar.pyplot(fig_word)
+# 	st.caption('Word cloud of most common words between the date range and text search')
+# 	plt.imshow(wordcloud, interpolation='bilinear')
+# 	plt.axis("off")
+# 	plt.show()
+# 	st.pyplot(fig_word)
