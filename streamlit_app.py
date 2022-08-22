@@ -123,7 +123,7 @@ Table Interactivity:
 - Copy to clipboard: select one or multiple cells, copy them to clipboard, and paste them into your favorite spreadsheet software.""")
 	
 	st.caption("[*Table Interactivity Source*](https://docs.streamlit.io/library/api-reference/data/st.dataframe)")
-	st.markdown("All data, including the app, is stored on [this GitHub repository](https://github.com/salmaniye/msc-project)")
+# 	st.markdown("All data, including the app, is stored on [this GitHub repository](https://github.com/salmaniye/msc-project)")
 
 	st.caption('by Salman Fatahillah/sxf181')
 
