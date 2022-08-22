@@ -241,7 +241,8 @@ with common:
 	st.markdown(f"<h5 style='text-align: left;'>Tweets on {game_name}</h5>", unsafe_allow_html=True)
 	st.dataframe(filtered_df)
 
-# with word_cloud:
+with word_cloud:
+	st.caption('under maintenance')
 # 	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
 # 	# dataset_text = ''.join(ch for ch in string_value if ch.isalnum())
 # 	# remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
