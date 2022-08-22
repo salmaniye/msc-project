@@ -1,0 +1,112 @@
+[
+   {
+   "id":"01",
+   "name": "Pokémon X&Y",
+   "paragraph1": "Pokémon X & Y is the first main series Pokémon game released for the Nintendo 3DS. The game introduced new features such as the Fairy-type, character customization, Pokémon-Amie which allows the player to develop stronger bonds with their Pokémon, Super Training which allows players to train their Pokémon on the touch screen on the 3DS, Wonder Trade which allows players to randomly trade with another player using the feature, and a new form of Pokémon evolution called “Mega Evolution” which allows players to further evolve fully evolved Pokémon. Some changes were also made such as Exp. Share where it is no longer a hold item and is instead a Tool.",
+   "paragraph2": "The game is set in the Kalos region, with the objective to beat the antagonistic team; Team Flare.",
+   "suggested_searches": "**Suggested searches**:\n- 'fairy'\n- 'character customization'\n- 'pokemon-amie'\n- 'super training'\n- 'wonder trade'\n- 'mega evolution'\n- 'exp share'\n- 'kalos'\n- 'team flare'",
+   "image": "https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-x-y-version/2/2c/Pokemon_xy_box_art.png",
+   "source": "*Source: IGN*",
+   "announced": "**Announcement:** 8th January 2013",
+   "released": "**Release:** 12th October 2013"
+   },
+   {
+   "id":"02",
+   "name": "Pokémon Omega Ruby & Alpha Sapphire",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-omega-ruby-and-alpha-sapphire/2/20/Pokemon-oras-box-art.png?width=1280",
+   "source": "*Source: IGN*",
+   "announced": "**Announcement:** 7th May 2014",
+   "released": "**Release:** 21st November 2014"
+   },
+   {
+   "id":"03",
+   "name": "Pokémon Sun & Moon",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://nintendoeverything.com/wp-content/uploads/pokemon-sun-moon-boxart-na.jpg",
+   "source": "*Source: Nintendo Everything*",
+   "announced": "**Announcement:** 26th February 2016",
+   "released": "**Release:** 18th November 2016"
+   },
+   {
+   "id":"04",
+   "name": "Pokémon Ultra Sun & Ultra Moon",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg",
+   "source": "*Source: Nintendo Everything*",
+   "announced": "**Announcement:** 6th June 2017",
+   "released": "**Release:** 17th November 2017"
+   },
+   {
+   "id":"05",
+   "name": "Pokémon: Let's Go, Pikachu! and Let's Go, Eevee!",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://projectpokemon.org/home/uploads/monthly_2019_06/large.pikavee.png.d7bf0a83bc6ff9577002fdd2d8d5d68c.png",
+   "source": "*Source: Project Pokemon*",
+   "announced": "**Announcement:** 30th May 2018",
+   "released": "**Release:** 16th November 2018"
+   },
+   {
+   "id":"06",
+   "name": "Pokémon Sword & Shield",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://projectpokemon.org/home/uploads/monthly_2019_06/large.swordnshield.png.051ae8b21788af441c7493b55ff8ad85.png",
+   "source": "*Source: Project Pokemon*",
+   "announced": "**Announcement:** 27th February 2019",
+   "released": "**Release**: 15th November 2019"
+   },
+   {
+   "id":"07",
+   "name": "Pokémon Sword and Shield: The Isle of Armor and The Crown Tundra",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://i0.wp.com/www.rapidreviewsuk.com/wp-content/uploads/2020/06/Pokemon-DLC-Header-e1593108081197.png?fit=1301%2C533&ssl=1",
+   "source": "*Source: Rapid Reviews UK*",
+   "announced": "**Announcement for both expansions:** 9th January 2020",
+   "released": "**Isle of Armor Release:** 17th June 2020\n**Crown Tundra Release:** 23rd October 2020"
+   },
+   {
+   "id":"08",
+   "name": "Pokémon Brilliant Diamond & Shining Pearl",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://d28ipuewd7cdcq.cloudfront.net/assets/editorial/2021/05/pokemon-brilliant-diamond-pokemon-shining-pearl-box-art.png",
+   "source": "*Source: SuperParent*",
+   "announced": "**Announcement:** 27th February 2021",
+   "released": "**Release:** 19th November 2021"
+   },
+   {
+   "id":"09",
+   "name": "Pokémon Legends: Arceus",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://m.media-amazon.com/images/I/71HYKF4rO9L._AC_SY445_.jpg",
+   "source": "*Source: Amazon*",
+   "announced": "**Announcement:** 27th February 2021",
+   "released": "**Release:** 28th January 2022"
+   },
+   {
+   "id":"10",
+   "name": "Pokémon Scarlet & Violet",
+   "paragraph1": "",
+   "paragraph2": "",
+   "suggested_searches": "",
+   "image": "https://img.buzzfeed.com/buzzfeed-static/static/2022-06/1/14/asset/67720d6b2786/sub-buzz-3952-1654093639-8.png?downsize=700%3A%2A&output-quality=auto&output-format=auto",
+   "source": "*Source: Buzzfeed*",
+   "announced": "**Announcement:** 27th February 2022",
+   "released": "**Upcoming Release:** 18th November 2022"
+   }   
+]
