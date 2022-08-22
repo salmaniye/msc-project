@@ -74,12 +74,12 @@ def func_sentiment_per_day(df):
 
 @st.experimental_memo
 def func_slider_df_size(df,date_range):
-	df = df[df['date'].between(date_range[0],date_range[1],inclusive=True)]
+	df = df[df['date'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
 @st.experimental_memo
 def func_slider_df_all(df,date_range):
-	df = df[df['date'].between(date_range[0],date_range[1],inclusive=True)]
+	df = df[df['date'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
 @st.experimental_memo
@@ -110,6 +110,9 @@ games_csv = ['xy','oras','sunmoon','ultrasm','letsgo','swsh','swshdlc','bdsp','a
 games_zip = zip(games_list,games_csv)
 games_dict = dict(games_zip)
 
+
+########################################################################################################
+
 with input_container:
 	# a dropdown for the user to choose the game to be displayed
 	# st.markdown("# Control Panel")
@@ -118,26 +121,76 @@ with input_container:
 
 	with st.expander(f"About {game_name}"):
 		if game_name == 'Pokémon X&Y':
-			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-x-y-version/2/2c/Pokemon_xy_box_art.png")
-		if game_name == 'Pokémon Omega Ruby & Alpha Sapphire':
-			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-omega-ruby-and-alpha-sapphire/2/20/Pokemon-oras-box-art.png?width=1280")
-		if game_name == 'Pokémon Sun & Moon':
-			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
-		if game_name == 'Pokémon Ultra Sun & Ultra Moon':
-			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
-		if game_name == "Pokémon: Let's Go, Pikachu! and Let's Go, Eevee!":
-			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.pikavee.png.d7bf0a83bc6ff9577002fdd2d8d5d68c.png")
-		if game_name == 'Pokémon Sword & Shield':
-			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.swordnshield.png.051ae8b21788af441c7493b55ff8ad85.png")
-		if game_name == "Pokémon Sword and Shield: The Isle of Armor and The Crown Tundra":
-			st.image("https://i0.wp.com/www.rapidreviewsuk.com/wp-content/uploads/2020/06/Pokemon-DLC-Header-e1593108081197.png?fit=1301%2C533&ssl=1")
-		if game_name == 'Pokémon Brilliant Diamond & Shining Pearl':
-			st.image("https://d28ipuewd7cdcq.cloudfront.net/assets/editorial/2021/05/pokemon-brilliant-diamond-pokemon-shining-pearl-box-art.png")
-		if game_name == 'Pokémon Legends: Arceus':
-			st.image("https://m.media-amazon.com/images/I/71HYKF4rO9L._AC_SY445_.jpg")
-		if game_name == 'Pokémon Scarlet & Violet':
-			st.image("https://img.buzzfeed.com/buzzfeed-static/static/2022-06/1/14/asset/67720d6b2786/sub-buzz-3952-1654093639-8.png?downsize=700%3A%2A&output-quality=auto&output-format=auto")
+			st.markdown("""**Announcement:** 8th January 2013
 
+**Release:** 12th October 2013""")
+			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-x-y-version/2/2c/Pokemon_xy_box_art.png")
+			st.caption('*Source: IGN*')
+
+		if game_name == 'Pokémon Omega Ruby & Alpha Sapphire':
+			st.markdown("""**Announcement:** 7th May 2014
+
+**Release:** 21st November 2014""")
+			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-omega-ruby-and-alpha-sapphire/2/20/Pokemon-oras-box-art.png?width=1280")
+			st.caption('*Source: IGN*')			
+
+		if game_name == 'Pokémon Sun & Moon':
+			st.markdown("""**Announcement:** 26th February 2016
+
+**Release:** 18th November 2016""")
+			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
+			st.caption('*Source: Nintendo Everything*')
+
+		if game_name == 'Pokémon Ultra Sun & Ultra Moon':
+			st.markdown("""**Announcement:** 6th June 2017
+
+**Release:** 17th November 2017""")
+			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
+			st.caption('*Source: Nintendo Everything*')
+
+		if game_name == "Pokémon: Let's Go, Pikachu! and Let's Go, Eevee!":
+			st.markdown("""**Announcement:** 30th May 2018
+
+**Release:** 16th November 2018""")
+			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.pikavee.png.d7bf0a83bc6ff9577002fdd2d8d5d68c.png")
+			st.caption('*Source: Project Pokemon*')
+
+		if game_name == 'Pokémon Sword & Shield':
+			st.markdown("""**Announcement:** 27th February 2019
+
+Release: 15th November 2019""")
+			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.swordnshield.png.051ae8b21788af441c7493b55ff8ad85.png")
+			st.caption('*Source: Project Pokemon*')
+
+		if game_name == "Pokémon Sword and Shield: The Isle of Armor and The Crown Tundra":
+			st.markdown("""**Announcement for both expansions:** 9th January 2020
+
+**Isle of Armor Release:** 17th June 2020
+
+**Crown Tundra Release:** 23rd October 2020""")
+			st.image("https://i0.wp.com/www.rapidreviewsuk.com/wp-content/uploads/2020/06/Pokemon-DLC-Header-e1593108081197.png?fit=1301%2C533&ssl=1")
+			st.caption('*Source: Rapid Reviews UK*')
+		if game_name == 'Pokémon Brilliant Diamond & Shining Pearl':
+			st.markdown("""**Announcement:** 27th February 2021
+
+**Release:** 19th November 2021""")
+			st.image("https://d28ipuewd7cdcq.cloudfront.net/assets/editorial/2021/05/pokemon-brilliant-diamond-pokemon-shining-pearl-box-art.png")
+		
+		if game_name == 'Pokémon Legends: Arceus':
+			st.markdown("""**Announcement:** 27th February 2021
+
+**Release:** 28th January 2022""")
+			st.image("https://m.media-amazon.com/images/I/71HYKF4rO9L._AC_SY445_.jpg")
+			st.caption('*Source: Amazon*')
+
+		if game_name == 'Pokémon Scarlet & Violet':
+			st.markdown("""**Announcement:** 27th February 2022
+**Upcoming Release:** 18th November 2022""")
+			st.image("https://img.buzzfeed.com/buzzfeed-static/static/2022-06/1/14/asset/67720d6b2786/sub-buzz-3952-1654093639-8.png?downsize=700%3A%2A&output-quality=auto&output-format=auto")
+			st.caption('*Source: Buzzfeed*')
+
+
+########################################################################################################
 
 game_dataset = call_dataset(games_dict[game_name])
 
@@ -212,7 +265,7 @@ fig = px.line(slider_df, x='date', y='size', labels={
 	color='sentiment',
 	color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'}) 
 	#['red', 'blue', 'green']
-fig.update_layout(title_text="Number of tweets and their sentiment over time", title_x=0.5)
+fig.update_layout(title_text=f"Number of tweets on {game_name} and their sentiment over time", title_x=0.5)
 
 # fig2. normalized sentiment area over time
 sentiment_total_pd = slider_df.groupby(['date'], as_index=False).sum()
@@ -225,12 +278,12 @@ fig2 = px.area(spd, x='date', y='sentiment percentage',labels={
 	color='sentiment',
 	color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'},
 	category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
-fig2.update_layout(title_text="Normalized sentiment over time", title_x=0.5)
+fig2.update_layout(title_text=f"Normalized sentiment of tweets on {game_name} over time", title_x=0.5)
 
 with dataset:
 	st.markdown(f"<h3 style='text-align: center;'>Sentiment of pre-release tweets on main series Pokémon games</h3>", unsafe_allow_html=True)
 	st.caption('**Please note the control panel is on the sidebar**')
-	st.text(f'Tweets from {date_range[0]} to {date_range[1]}')
+	st.markdown(f'Displaying tweets from **{date_range[0]}** to **{date_range[1]}**')
 	with col1:
 		st.write(fig)
 	with col2:
@@ -241,8 +294,7 @@ with common:
 	st.markdown(f"<h5 style='text-align: left;'>Tweets on {game_name}</h5>", unsafe_allow_html=True)
 	st.dataframe(filtered_df)
 
-with word_cloud:
-	st.caption('under maintenance')
+# with word_cloud:
 # 	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
 # 	# dataset_text = ''.join(ch for ch in string_value if ch.isalnum())
 # 	# remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
