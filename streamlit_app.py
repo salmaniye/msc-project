@@ -9,6 +9,7 @@ import altair as alt
 from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
+import json
 
 st.set_page_config(layout="wide")
 about = st.container()
@@ -16,10 +17,20 @@ about = st.container()
 with st.sidebar:
 	input_container, word_cloud, help_tab = st.tabs(["Control Panel", "WordCloud", "Help"])
 
+metrics = st.container()
+with metrics:
+	st.caption('**Please refer to "Help" on the sidebar on how to use the web app**')
+	st.markdown(f'Overall metrics difference from previous game (this is unaffected by options):')
+	subcol1, subcol2, subcol3 = st.columns(3)
+	st.markdown(f'***')
+
 dataset = st.container()
 col1, col2 = st.columns(2)
-
 common = st.container()
+
+# loading metadata
+with open(f"datasets/games_metadata.json") as file:
+    game_metadata = json.load(file)
 
 # functions
 @st.experimental_memo
@@ -70,36 +81,46 @@ def call_dataset(game_name):
 
 @st.experimental_memo
 def func_sentiment_per_day(df):
+	# for creating df with number of tweets
 	df = df.groupby(['sentiment','date'], as_index=False).size()
 	return df
 
 @st.experimental_memo
 def func_slider_df_size(df,date_range):
+	# for filtering dates of df with number of tweets
 	df = df[df['date'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
 @st.experimental_memo
 def func_slider_df_all(df,date_range):
+	# for filtering dates of df with original columns
 	df = df[df['date'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
 @st.experimental_memo
 def func_filtered_df(df,options_sentiment):
+	# for filtering sentiment
 	df = df[df["sentiment"].isin(options_sentiment)]
 	return df
 
 @st.experimental_memo
 def func_keyword(df,key):
+	# for filtering with text search
 	df =  df[df['text'].str.contains(pat=key, case=False)==True]
 	return df
 
 with about:
-	st.title("Sentiment of pre-release tweets on main series Pokémon games")
+	st.markdown(f"## Sentiment of pre-release tweets on main series Pokémon games")
 	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.""")
 
 with help_tab:
-	st.markdown("""The control panel provides options to choose which game to display, starting and end dates, filtering by sentiment, and text search.
-### User Guide:
+	st.markdown("""# User Guide:
+
+The control panel provides options to choose which game to display, starting and end dates, filtering by sentiment, and text search.
+
+***
+
+## Control Panel
 Game selection:
 - Press anywhere within the select widget to view list of games.
 
@@ -113,8 +134,11 @@ Filtering by sentiment:
 Text search:
 - Type anything into the search box
 
-To submit all of the above selections, press the submit button.
+To submit all of the above selections, press the **Submit** button.
 
+***
+
+## Figures
 Table Interactivity:
 - Column sorting: sort columns by clicking on their headers.
 - Column resizing: resize columns by dragging and dropping column header borders.
@@ -122,8 +146,10 @@ Table Interactivity:
 - Search: search through data by clicking a table, using hotkeys (⌘ Cmd + F or Ctrl + F) to bring up the search bar, and using the search bar to filter data.
 - Copy to clipboard: select one or multiple cells, copy them to clipboard, and paste them into your favorite spreadsheet software.""")
 	
-	st.caption("[*Table Interactivity Source*](https://docs.streamlit.io/library/api-reference/data/st.dataframe)")
-# 	st.markdown("All data, including the app, is stored on [this GitHub repository](https://github.com/salmaniye/msc-project)")
+	st.caption("[*Source*](https://docs.streamlit.io/library/api-reference/data/st.dataframe)")
+	st.markdown("""***
+
+All data, including the app, is stored on [this GitHub repository]""") #(https://github.com/salmaniye/msc-project)
 
 	st.caption('by Salman Fatahillah/sxf181')
 
@@ -137,9 +163,30 @@ games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 games_csv = ['xy','oras','sunmoon','ultrasm','letsgo','swsh','swshdlc','bdsp','arceus','sv']
 games_zip = zip(games_list,games_csv)
 games_dict = dict(games_zip)
+games_dict_index = dict(zip(games_list,range(10)))
 
+metrics_data = pd.read_csv(f'datasets/games_metrics.csv')
 
 ########################################################################################################
+def call_metric_data(index_no):
+	if index_no == 0:
+		with subcol1:
+			st.metric(label="Positive", value=f'{metrics_data.loc[0][1]:.2f}%', delta=None)
+		with subcol2:
+			st.metric(label="Neutral", value=f'{metrics_data.loc[0][2]:.2f}%', delta=None)
+		with subcol3:
+			st.metric(label="Negative", value=f'{metrics_data.loc[0][3]:.2f}%', delta=None)
+	else:
+		with subcol1:
+			delta1 = metrics_data.loc[index_no][1] - metrics_data.loc[index_no-1][1]
+			st.metric(label="Positive", value=f'{metrics_data.loc[index_no][1]:.2f}%', delta=f'{delta1:.2f}%')
+		with subcol2:
+			delta2 = metrics_data.loc[index_no][2] - metrics_data.loc[index_no-1][2]
+			st.metric(label="Neutral", value=f'{metrics_data.loc[index_no][2]:.2f}%', delta=f'{delta2:.2f}%')
+		with subcol3:
+			delta3 = metrics_data.loc[index_no][3] - metrics_data.loc[index_no-1][3]
+			st.metric(label="Negative", value=f'{metrics_data.loc[index_no][3]:.2f}%', delta=f'{delta3:.2f}')
+
 
 with input_container:
 	# a dropdown for the user to choose the game to be displayed
@@ -148,76 +195,16 @@ with input_container:
 	st.caption(f'You have selected: {game_name}')
 
 	with st.expander(f"About {game_name}"):
-		if game_name == 'Pokémon X&Y':
-			st.markdown("""**Announcement:** 8th January 2013
-
-**Release:** 12th October 2013""")
-			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-x-y-version/2/2c/Pokemon_xy_box_art.png")
-			st.caption('*Source: IGN*')
-
-		if game_name == 'Pokémon Omega Ruby & Alpha Sapphire':
-			st.markdown("""**Announcement:** 7th May 2014
-
-**Release:** 21st November 2014""")
-			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-omega-ruby-and-alpha-sapphire/2/20/Pokemon-oras-box-art.png?width=1280")
-			st.caption('*Source: IGN*')			
-
-		if game_name == 'Pokémon Sun & Moon':
-			st.markdown("""**Announcement:** 26th February 2016
-
-**Release:** 18th November 2016""")
-			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
-			st.caption('*Source: Nintendo Everything*')
-
-		if game_name == 'Pokémon Ultra Sun & Ultra Moon':
-			st.markdown("""**Announcement:** 6th June 2017
-
-**Release:** 17th November 2017""")
-			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
-			st.caption('*Source: Nintendo Everything*')
-
-		if game_name == "Pokémon: Let's Go, Pikachu! and Let's Go, Eevee!":
-			st.markdown("""**Announcement:** 30th May 2018
-
-**Release:** 16th November 2018""")
-			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.pikavee.png.d7bf0a83bc6ff9577002fdd2d8d5d68c.png")
-			st.caption('*Source: Project Pokemon*')
-
-		if game_name == 'Pokémon Sword & Shield':
-			st.markdown("""**Announcement:** 27th February 2019
-
-Release: 15th November 2019""")
-			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.swordnshield.png.051ae8b21788af441c7493b55ff8ad85.png")
-			st.caption('*Source: Project Pokemon*')
-
-		if game_name == "Pokémon Sword and Shield: The Isle of Armor and The Crown Tundra":
-			st.markdown("""**Announcement for both expansions:** 9th January 2020
-
-**Isle of Armor Release:** 17th June 2020
-
-**Crown Tundra Release:** 23rd October 2020""")
-			st.image("https://i0.wp.com/www.rapidreviewsuk.com/wp-content/uploads/2020/06/Pokemon-DLC-Header-e1593108081197.png?fit=1301%2C533&ssl=1")
-			st.caption('*Source: Rapid Reviews UK*')
-		if game_name == 'Pokémon Brilliant Diamond & Shining Pearl':
-			st.markdown("""**Announcement:** 27th February 2021
-
-**Release:** 19th November 2021""")
-			st.image("https://d28ipuewd7cdcq.cloudfront.net/assets/editorial/2021/05/pokemon-brilliant-diamond-pokemon-shining-pearl-box-art.png")
-		
-		if game_name == 'Pokémon Legends: Arceus':
-			st.markdown("""**Announcement:** 27th February 2021
-
-**Release:** 28th January 2022""")
-			st.image("https://m.media-amazon.com/images/I/71HYKF4rO9L._AC_SY445_.jpg")
-			st.caption('*Source: Amazon*')
-
-		if game_name == 'Pokémon Scarlet & Violet':
-			st.markdown("""**Announcement:** 27th February 2022
-**Upcoming Release:** 18th November 2022""")
-			st.image("https://img.buzzfeed.com/buzzfeed-static/static/2022-06/1/14/asset/67720d6b2786/sub-buzz-3952-1654093639-8.png?downsize=700%3A%2A&output-quality=auto&output-format=auto")
-			st.caption('*Source: Buzzfeed*')
-
-
+		for entry in game_metadata:
+			if game_name == entry['name']:
+				st.markdown(f"""{entry['announced']}  
+					{entry['released']}""")
+				st.image(entry['image'])
+				st.caption(entry['source'])
+				st.markdown(entry['paragraph1'])
+				st.markdown(entry['paragraph2'])
+				st.markdown(entry['suggested_searches'])
+				call_metric_data(games_dict_index[game_name])
 ########################################################################################################
 
 @st.experimental_memo
@@ -320,10 +307,16 @@ spd['sentiment percentage'] = 100*(spd['size_x']/spd['size_y'])
 
 fig2 = func_creating_fig2(spd)
 
+total_number_of_tweets = len(filtered_df['text'])
+positive_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Positive'])/len(filtered_df['sentiment'])
+neutral_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Neutral'])/len(filtered_df['sentiment'])
+negative_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Negative'])/len(filtered_df['sentiment'])
+
 with dataset:
-	# st.markdown(f"<h3 style='text-align: center;'>Sentiment of pre-release tweets on main series Pokémon games</h3>", unsafe_allow_html=True)
-	st.caption('**Please note the control panel is on the sidebar**')
-	st.markdown(f'Displaying tweets from **{date_range[0]}** to **{date_range[1]}**')
+	st.markdown(f"""Displaying tweets from **{date_range[0]}** to **{date_range[1]}**  
+	Total Number of Tweets: **{total_number_of_tweets}**  
+	Positive: **{positive_percentage:.2f}%**, Neutral: **{neutral_percentage:.2f}%**, Negative: **{negative_percentage:.2f}%**""")
+
 	with col1:
 		st.write(fig)
 	with col2:
@@ -336,23 +329,24 @@ with common:
 
 with word_cloud:
 	st.write('in progress...')
-# 	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
-# 	# dataset_text = ''.join(ch for ch in string_value if ch.isalnum())
-# 	# remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
-# 	# 				'X','Y','x','y','Sun','Moon','SunMoon','PokemonSunMoon',
-# 	# 				'Alpha','Sapphire','Omega', 'Ruby','ORAS',
-# 	# 				'user']
+	# dataset_text = ' '.join(game_dataset['preprocessed tweets'])
+	# dataset_text = dataset_text.split()
+	# # dataset_text = ''.join(ch for ch in string_value if ch.isalnum())
+	# # remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
+	# # 				'X','Y','x','y','Sun','Moon','SunMoon','PokemonSunMoon',
+	# # 				'Alpha','Sapphire','Omega', 'Ruby','ORAS',
+	# # 				'user']
 
-# 	# for word in remove_words:
-# 	# 	dataset_text = dataset_text.replace(word,'')
+	# # for word in remove_words:
+	# # 	dataset_text = dataset_text.replace(word,'')
 
-# 	fig_word, ax = plt.subplots()
+	# fig_word, ax = plt.subplots()
 
-# 	wordcloud = WordCloud(background_color='white', colormap='Set2',
-# 				collocations=False, stopwords = STOPWORDS).generate(dataset_text)
+	# wordcloud = WordCloud(background_color='white', colormap='Set2',
+	# 			collocations=False, stopwords = STOPWORDS).generate(dataset_text)
 
-# 	st.caption('Word cloud of most common words between the date range and text search')
-# 	plt.imshow(wordcloud, interpolation='bilinear')
-# 	plt.axis("off")
-# 	plt.show()
-# 	st.pyplot(fig_word)
+	# st.caption('Word cloud of most common words between the date range and text search')
+	# plt.imshow(wordcloud, interpolation='bilinear')
+	# plt.axis("off")
+	# plt.show()
+	# st.pyplot(fig_word)
