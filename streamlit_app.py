@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime
 import io
 import altair as alt
@@ -10,10 +11,10 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 
 st.set_page_config(layout="wide")
-
+about = st.container()
 # initializing containers
 with st.sidebar:
-	input_container, word_cloud,  header = st.tabs(["Control Panel", "WordCloud", "About"])
+	input_container, word_cloud, help_tab = st.tabs(["Control Panel", "WordCloud", "Help"])
 
 dataset = st.container()
 col1, col2 = st.columns(2)
@@ -92,12 +93,39 @@ def func_keyword(df,key):
 	df =  df[df['text'].str.contains(pat=key, case=False)==True]
 	return df
 
-
-with header:
+with about:
 	st.title("Sentiment of pre-release tweets on main series Pokémon games")
-	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.
+	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.""")
 
-place holder""")
+with help_tab:
+	st.markdown("""The control panel provides options to choose which game to display, starting and end dates, filtering by sentiment, and text search.
+### User Guide:
+Game selection:
+- Press anywhere within the select widget to view list of games.
+
+Starting and end dates:
+- Choose from the calendar the starting and end dates
+- String search is also possible, just type in the box
+
+Filtering by sentiment:
+- Press the (x) to remove sentiment to filter
+
+Text search:
+- Type anything into the search box
+
+To submit all of the above selections, press the submit button.
+
+Table Interactivity:
+- Column sorting: sort columns by clicking on their headers.
+- Column resizing: resize columns by dragging and dropping column header borders.
+- Table (height, width) resizing: resize tables by dragging and dropping the bottom right corner of tables.
+- Search: search through data by clicking a table, using hotkeys (⌘ Cmd + F or Ctrl + F) to bring up the search bar, and using the search bar to filter data.
+- Copy to clipboard: select one or multiple cells, copy them to clipboard, and paste them into your favorite spreadsheet software.""")
+	
+	st.caption("[*Table Interactivity Source*](https://docs.streamlit.io/library/api-reference/data/st.dataframe)")
+	st.markdown("All data, including the app, is stored on [this GitHub repository](https://github.com/salmaniye/msc-project)")
+
+	st.caption('by Salman Fatahillah/sxf181')
 
 games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 			  'Pokémon Sun & Moon', 'Pokémon Ultra Sun & Ultra Moon',
@@ -192,6 +220,30 @@ Release: 15th November 2019""")
 
 ########################################################################################################
 
+@st.experimental_memo
+def func_creating_fig1(df):
+	fig = px.line(df, x='date', y='size', labels={
+		'date':'Date',
+		'size':'Number of tweets',
+		'sentiment':'Sentiment'},
+		color='sentiment',
+		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'}) 
+		#['red', 'blue', 'green']
+	fig.update_layout(title_text=f"Number of tweets on {game_name} and their sentiment over time", title_x=0.5)
+	return fig
+
+@st.experimental_memo
+def func_creating_fig2(df):
+	fig2 = px.area(df, x='date', y='sentiment percentage',labels={
+		'date':'Date',
+		'sentiment percentage':'Sentiment (%)',
+		'sentiment':'Sentiment'},
+		color='sentiment',
+		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'},
+		category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
+	fig2.update_layout(title_text=f"Normalized sentiment of tweets on {game_name} over time", title_x=0.5)
+	return fig2
+
 game_dataset = call_dataset(games_dict[game_name])
 
 with input_container:
@@ -258,30 +310,18 @@ if keyword_text:
 	filtered_df = func_keyword(filtered_df,keyword_text)
 
 # fig1. sentiment over time
-fig = px.line(slider_df, x='date', y='size', labels={
-	'date':'Date',
-	'size':'Number of tweets',
-	'sentiment':'Sentiment'},
-	color='sentiment',
-	color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'}) 
-	#['red', 'blue', 'green']
-fig.update_layout(title_text=f"Number of tweets on {game_name} and their sentiment over time", title_x=0.5)
+fig = func_creating_fig1(slider_df)
+
 
 # fig2. normalized sentiment area over time
 sentiment_total_pd = slider_df.groupby(['date'], as_index=False).sum()
 spd = slider_df.merge(sentiment_total_pd, left_on = 'date', right_on='date')
-spd['sentiment percentage'] = spd['size_x']/spd['size_y']
-fig2 = px.area(spd, x='date', y='sentiment percentage',labels={
-	'date':'Date',
-	'sentiment percentage':'Sentiment (%)',
-	'sentiment':'Sentiment'},
-	color='sentiment',
-	color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'},
-	category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
-fig2.update_layout(title_text=f"Normalized sentiment of tweets on {game_name} over time", title_x=0.5)
+spd['sentiment percentage'] = 100*(spd['size_x']/spd['size_y'])
+
+fig2 = func_creating_fig2(spd)
 
 with dataset:
-	st.markdown(f"<h3 style='text-align: center;'>Sentiment of pre-release tweets on main series Pokémon games</h3>", unsafe_allow_html=True)
+	# st.markdown(f"<h3 style='text-align: center;'>Sentiment of pre-release tweets on main series Pokémon games</h3>", unsafe_allow_html=True)
 	st.caption('**Please note the control panel is on the sidebar**')
 	st.markdown(f'Displaying tweets from **{date_range[0]}** to **{date_range[1]}**')
 	with col1:
