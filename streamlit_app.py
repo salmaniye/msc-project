@@ -13,7 +13,7 @@ st.set_page_config(layout="wide")
 
 # initializing containers
 with st.sidebar:
-	input_container, word_cloud,  header = st.tabs(["Controls", "WordCloud", "About"])
+	input_container, word_cloud,  header = st.tabs(["Control Panel", "WordCloud", "About"])
 
 dataset = st.container()
 col1, col2 = st.columns(2)
@@ -101,7 +101,7 @@ place holder""")
 
 games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 			  'Pokémon Sun & Moon', 'Pokémon Ultra Sun & Ultra Moon',
-			  "Pokémon Let's Go, Pikachu! and Let's Go, Eevee!",
+			  "Pokémon: Let's Go, Pikachu! and Let's Go, Eevee!",
 			  'Pokémon Sword & Shield', 'Pokémon Sword and Shield: The Isle of Armor and The Crown Tundra',
 			  'Pokémon Brilliant Diamond & Shining Pearl',
 			  'Pokémon Legends: Arceus', 'Pokémon Scarlet & Violet']
@@ -112,9 +112,32 @@ games_dict = dict(games_zip)
 
 with input_container:
 	# a dropdown for the user to choose the game to be displayed
-	st.markdown("# Control Panel")
+	# st.markdown("# Control Panel")
 	game_name = st.selectbox('Select a game to display:', games_list)
 	st.caption(f'You have selected: {game_name}')
+
+	with st.expander(f"About {game_name}"):
+		if game_name == 'Pokémon X&Y':
+			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-x-y-version/2/2c/Pokemon_xy_box_art.png")
+		if game_name == 'Pokémon Omega Ruby & Alpha Sapphire':
+			st.image("https://oyster.ignimgs.com/mediawiki/apis.ign.com/pokemon-omega-ruby-and-alpha-sapphire/2/20/Pokemon-oras-box-art.png?width=1280")
+		if game_name == 'Pokémon Sun & Moon':
+			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
+		if game_name == 'Pokémon Ultra Sun & Ultra Moon':
+			st.image("https://nintendoeverything.com/wp-content/uploads/pokemon-ultra-sun-ultra-moon-boxart.jpg")
+		if game_name == "Pokémon: Let's Go, Pikachu! and Let's Go, Eevee!":
+			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.pikavee.png.d7bf0a83bc6ff9577002fdd2d8d5d68c.png")
+		if game_name == 'Pokémon Sword & Shield':
+			st.image("https://projectpokemon.org/home/uploads/monthly_2019_06/large.swordnshield.png.051ae8b21788af441c7493b55ff8ad85.png")
+		if game_name == "Pokémon Sword and Shield: The Isle of Armor and The Crown Tundra":
+			st.image("https://i0.wp.com/www.rapidreviewsuk.com/wp-content/uploads/2020/06/Pokemon-DLC-Header-e1593108081197.png?fit=1301%2C533&ssl=1")
+		if game_name == 'Pokémon Brilliant Diamond & Shining Pearl':
+			st.image("https://d28ipuewd7cdcq.cloudfront.net/assets/editorial/2021/05/pokemon-brilliant-diamond-pokemon-shining-pearl-box-art.png")
+		if game_name == 'Pokémon Legends: Arceus':
+			st.image("https://m.media-amazon.com/images/I/71HYKF4rO9L._AC_SY445_.jpg")
+		if game_name == 'Pokémon Scarlet & Violet':
+			st.image("https://img.buzzfeed.com/buzzfeed-static/static/2022-06/1/14/asset/67720d6b2786/sub-buzz-3952-1654093639-8.png?downsize=700%3A%2A&output-quality=auto&output-format=auto")
+
 
 game_dataset = call_dataset(games_dict[game_name])
 
@@ -215,7 +238,7 @@ with dataset:
 
 with common:
 	# display tweets
-	st.markdown(f"<h5 style='text-align: center;'>Tweets on {game_name}</h5>", unsafe_allow_html=True)
+	st.markdown(f"<h5 style='text-align: left;'>Tweets on {game_name}</h5>", unsafe_allow_html=True)
 	st.dataframe(filtered_df)
 
 # with word_cloud:
