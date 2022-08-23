@@ -21,7 +21,7 @@ with st.sidebar:
 metrics = st.container()
 with metrics:
 	st.caption('**Please refer to "Help" on the sidebar on how to use the web app**')
-	st.markdown(f'Overall metrics difference from previous game (unaffected by options):')
+	metrics_title = st.container()
 	subcol1, subcol2, subcol3 = st.columns(3)
 	st.markdown(f'***')
 
@@ -141,6 +141,8 @@ games_dict_index = dict(zip(games_list,range(10)))
 metrics_data = pd.read_csv(f'datasets/games_metrics.csv')
 
 def call_metric_data(index_no):
+	with metrics_title:
+		st.markdown('Overall metrics' if index_no == 0 else f'Overall metrics difference from previous game (unaffected by options):')
 	for i,column in enumerate([subcol1,subcol2,subcol3]):
 		with column:
 			delta = None if index_no == 0 else metrics_data.loc[index_no][i+1] - metrics_data.loc[index_no-1][i+1]
