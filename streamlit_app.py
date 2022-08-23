@@ -133,13 +133,14 @@ with input_container:
 	st.caption(f'You have selected: {game_name}')
 
 	# About game section
-	with st.expander(f"About {game_name}"):
-		for entry in game_metadata:
-			if game_name == entry['name']:
+	
+	for entry in game_metadata:
+		if game_name == entry['name']:
+			st.image(entry['image'])
+			st.caption(entry['source'])
+			with st.expander(f"🎮 About {game_name}"):
 				st.markdown(f"""{entry['announced']}  
 					{entry['released']}""")
-				st.image(entry['image'])
-				st.caption(entry['source'])
 				st.markdown(entry['paragraph1'])
 				st.markdown(entry['paragraph2'])
 				st.markdown(entry['suggested_searches'])
