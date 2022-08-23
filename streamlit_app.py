@@ -148,7 +148,7 @@ with input_container:
 @st.experimental_memo
 def func_creating_fig1(df):
 	# creates plot of number of tweets and sentiment
-	fig = px.line(df, x='date', y='size', labels={
+	fig = px.line(df, x='datetime', y='size', labels={
 		'date':'Date',
 		'size':'Number of tweets',
 		'sentiment':'Sentiment'},
@@ -161,7 +161,7 @@ def func_creating_fig1(df):
 @st.experimental_memo
 def func_creating_fig2(df):
 	# creates plot of normalized sentiment with percentage
-	fig2 = px.area(df, x='date', y='sentiment percentage',labels={
+	fig2 = px.area(df, x='datetime', y='sentiment percentage',labels={
 		'date':'Date',
 		'sentiment percentage':'Sentiment (%)',
 		'sentiment':'Sentiment'},
