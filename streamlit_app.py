@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 import json
 
+# set deafult layout to wide
 st.set_page_config(layout="wide")
-about = st.container()
+header = st.container()
 # initializing containers
 with st.sidebar:
 	input_container, word_cloud, help_tab = st.tabs(["Control Panel", "WordCloud", "Help"])
@@ -20,7 +21,7 @@ with st.sidebar:
 metrics = st.container()
 with metrics:
 	st.caption('**Please refer to "Help" on the sidebar on how to use the web app**')
-	st.markdown(f'Overall metrics difference from previous game (this is unaffected by options):')
+	st.markdown(f'Overall metrics difference from previous game (unaffected by options):')
 	subcol1, subcol2, subcol3 = st.columns(3)
 	st.markdown(f'***')
 
@@ -109,48 +110,19 @@ def func_keyword(df,key):
 	df =  df[df['text'].str.contains(pat=key, case=False)==True]
 	return df
 
-with about:
+with header:
 	st.markdown(f"## Sentiment of pre-release tweets on main series Pokémon games")
 	st.markdown("""This is a web app that displays tweets and their sentiment on the selected Pokémon game.""")
 
+with open(f"datasets/user_guide.txt") as file:
+	user_guide_text = file.read()
+
+# user guide tab
 with help_tab:
-	st.markdown("""# User Guide:
-
-The control panel provides options to choose which game to display, starting and end dates, filtering by sentiment, and text search.
-
-***
-
-## Control Panel
-Game selection:
-- Press anywhere within the select widget to view list of games.
-
-Starting and end dates:
-- Choose from the calendar the starting and end dates
-- String search is also possible, just type in the box
-
-Filtering by sentiment:
-- Press the (x) to remove sentiment to filter
-
-Text search:
-- Type anything into the search box
-
-To submit all of the above selections, press the **Submit** button.
-
-***
-
-## Figures
-Table Interactivity:
-- Column sorting: sort columns by clicking on their headers.
-- Column resizing: resize columns by dragging and dropping column header borders.
-- Table (height, width) resizing: resize tables by dragging and dropping the bottom right corner of tables.
-- Search: search through data by clicking a table, using hotkeys (⌘ Cmd + F or Ctrl + F) to bring up the search bar, and using the search bar to filter data.
-- Copy to clipboard: select one or multiple cells, copy them to clipboard, and paste them into your favorite spreadsheet software.""")
-	
+	st.markdown(user_guide_text)
 	st.caption("[*Source*](https://docs.streamlit.io/library/api-reference/data/st.dataframe)")
-	st.markdown("""***
-
-All data, including the app, is stored on [this GitHub repository]""") #(https://github.com/salmaniye/msc-project)
-
+	st.markdown("***")
+	st.markdown("All data, including the app, is stored on [this GitHub repository]") #(https://github.com/salmaniye/msc-project)
 	st.caption('by Salman Fatahillah/sxf181')
 
 games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
@@ -165,35 +137,21 @@ games_zip = zip(games_list,games_csv)
 games_dict = dict(games_zip)
 games_dict_index = dict(zip(games_list,range(10)))
 
+# adding about game metadata and metrics
 metrics_data = pd.read_csv(f'datasets/games_metrics.csv')
 
-########################################################################################################
 def call_metric_data(index_no):
-	if index_no == 0:
-		with subcol1:
-			st.metric(label="Positive", value=f'{metrics_data.loc[0][1]:.2f}%', delta=None)
-		with subcol2:
-			st.metric(label="Neutral", value=f'{metrics_data.loc[0][2]:.2f}%', delta=None)
-		with subcol3:
-			st.metric(label="Negative", value=f'{metrics_data.loc[0][3]:.2f}%', delta=None)
-	else:
-		with subcol1:
-			delta1 = metrics_data.loc[index_no][1] - metrics_data.loc[index_no-1][1]
-			st.metric(label="Positive", value=f'{metrics_data.loc[index_no][1]:.2f}%', delta=f'{delta1:.2f}%')
-		with subcol2:
-			delta2 = metrics_data.loc[index_no][2] - metrics_data.loc[index_no-1][2]
-			st.metric(label="Neutral", value=f'{metrics_data.loc[index_no][2]:.2f}%', delta=f'{delta2:.2f}%')
-		with subcol3:
-			delta3 = metrics_data.loc[index_no][3] - metrics_data.loc[index_no-1][3]
-			st.metric(label="Negative", value=f'{metrics_data.loc[index_no][3]:.2f}%', delta=f'{delta3:.2f}')
-
+	for i,column in enumerate([subcol1,subcol2,subcol3]):
+		with column:
+			delta = None if index_no == 0 else metrics_data.loc[index_no][i+1] - metrics_data.loc[index_no-1][i+1]
+			st.metric(label="Positive", value=f'{metrics_data.loc[index_no][i+1]:.2f}%', delta= None if index_no == 0 else f'{delta:.2f}%')
 
 with input_container:
 	# a dropdown for the user to choose the game to be displayed
-	# st.markdown("# Control Panel")
 	game_name = st.selectbox('Select a game to display:', games_list)
 	st.caption(f'You have selected: {game_name}')
 
+	# About game section
 	with st.expander(f"About {game_name}"):
 		for entry in game_metadata:
 			if game_name == entry['name']:
@@ -205,10 +163,10 @@ with input_container:
 				st.markdown(entry['paragraph2'])
 				st.markdown(entry['suggested_searches'])
 				call_metric_data(games_dict_index[game_name])
-########################################################################################################
 
 @st.experimental_memo
 def func_creating_fig1(df):
+	# creates plot of number of tweets and sentiment
 	fig = px.line(df, x='date', y='size', labels={
 		'date':'Date',
 		'size':'Number of tweets',
@@ -216,11 +174,12 @@ def func_creating_fig1(df):
 		color='sentiment',
 		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'}) 
 		#['red', 'blue', 'green']
-	fig.update_layout(title_text=f"Number of tweets on {game_name} and their sentiment over time", title_x=0.5)
+	fig.update_layout(title_text=f"Number of tweets and their sentiment over time", title_x=0.5)
 	return fig
 
 @st.experimental_memo
 def func_creating_fig2(df):
+	# creates plot of normalized sentiment with percentage
 	fig2 = px.area(df, x='date', y='sentiment percentage',labels={
 		'date':'Date',
 		'sentiment percentage':'Sentiment (%)',
@@ -228,7 +187,7 @@ def func_creating_fig2(df):
 		color='sentiment',
 		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'},
 		category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
-	fig2.update_layout(title_text=f"Normalized sentiment of tweets on {game_name} over time", title_x=0.5)
+	fig2.update_layout(title_text=f"Normalized sentiment of tweets over time", title_x=0.5)
 	return fig2
 
 game_dataset = call_dataset(games_dict[game_name])
@@ -254,7 +213,7 @@ def clear_inputs():
 with inputs:
 	# start and end dates
 	date_range[0] = st.date_input('Select starting date:', min_date, min_date, max_date,key='dateinput1')
-	date_range[1] = st.date_input('Select end date:', max_date,date_range[0],max_date,key='dateinput2')
+	date_range[1] = st.date_input('Select end date:', max_date, min_date, max_date,key='dateinput2')
 
 	# options for filtering sentiment
 	options_sentiment = st.multiselect(label='Filter by sentiment (dropdown):',
@@ -270,7 +229,7 @@ with inputs:
 		st.caption(f'No text search input')
 
 	# submit button
-	submitted = st.form_submit_button("Submit")
+	submitted = st.form_submit_button("Click to Submit")
 
 	if submitted:
 		st.write("Submitted")
@@ -299,13 +258,15 @@ if keyword_text:
 # fig1. sentiment over time
 fig = func_creating_fig1(slider_df)
 
-
 # fig2. normalized sentiment area over time
-sentiment_total_pd = slider_df.groupby(['date'], as_index=False).sum()
-spd = slider_df.merge(sentiment_total_pd, left_on = 'date', right_on='date')
-spd['sentiment percentage'] = 100*(spd['size_x']/spd['size_y'])
+@st.experimental_memo
+def func_spd(df):
+	sentiment_total_pd = df.groupby(['date'], as_index=False).sum()
+	spd = df.merge(sentiment_total_pd, left_on = 'date', right_on='date')
+	spd['sentiment percentage'] = 100*(spd['size_x']/spd['size_y'])
+	return spd
 
-fig2 = func_creating_fig2(spd)
+fig2 = func_creating_fig2(func_spd(slider_df))
 
 total_number_of_tweets = len(filtered_df['text'])
 positive_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Positive'])/len(filtered_df['sentiment'])
@@ -313,7 +274,7 @@ neutral_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Neutral'])/l
 negative_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Negative'])/len(filtered_df['sentiment'])
 
 with dataset:
-	st.markdown(f"""Displaying tweets from **{date_range[0]}** to **{date_range[1]}**  
+	st.markdown(f"""Displaying tweets from **{date_range[0]}** to **{date_range[1]}** on **{game_name}**  
 	Total Number of Tweets: **{total_number_of_tweets}**  
 	Positive: **{positive_percentage:.2f}%**, Neutral: **{neutral_percentage:.2f}%**, Negative: **{negative_percentage:.2f}%**""")
 
@@ -324,29 +285,34 @@ with dataset:
 
 with common:
 	# display tweets
-	st.markdown(f"<h5 style='text-align: left;'>Tweets on {game_name}</h5>", unsafe_allow_html=True)
+	st.markdown(f"##### Tweets on {game_name}")
 	st.dataframe(filtered_df)
 
+@st.experimental_memo
+def wordcloud_generator():
+	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
+
+	with open(f"datasets/custom_stopwords.txt","r") as file:
+		custom_stopwords = []
+		for line in file:
+			line = line.rstrip("\n")
+			custom_stopwords.append(line)
+
+	stopwords_all = custom_stopwords + list(STOPWORDS)
+
+	fig_word, ax = plt.subplots()
+
+	wordcloud = WordCloud(background_color='white', colormap='Set2',
+				width = 1000, height=2600,
+				collocations=False, stopwords = stopwords_all).generate(dataset_text)
+
+	plt.imshow(wordcloud, interpolation='bilinear')
+	plt.axis("off")
+	plt.show()
+	return fig_word
+
 with word_cloud:
-	st.write('in progress...')
-	# dataset_text = ' '.join(game_dataset['preprocessed tweets'])
-	# dataset_text = dataset_text.split()
-	# # dataset_text = ''.join(ch for ch in string_value if ch.isalnum())
-	# # remove_words = ['https', 'Pokémon', 'pokemon','Pokemon', 'POKEMON','amp','t','co','RT',
-	# # 				'X','Y','x','y','Sun','Moon','SunMoon','PokemonSunMoon',
-	# # 				'Alpha','Sapphire','Omega', 'Ruby','ORAS',
-	# # 				'user']
 
-	# # for word in remove_words:
-	# # 	dataset_text = dataset_text.replace(word,'')
-
-	# fig_word, ax = plt.subplots()
-
-	# wordcloud = WordCloud(background_color='white', colormap='Set2',
-	# 			collocations=False, stopwords = STOPWORDS).generate(dataset_text)
-
-	# st.caption('Word cloud of most common words between the date range and text search')
-	# plt.imshow(wordcloud, interpolation='bilinear')
-	# plt.axis("off")
-	# plt.show()
-	# st.pyplot(fig_word)
+	st.caption('Word cloud of most common words between the date range and text search')
+	fig_word = wordcloud_generator()
+	st.pyplot(fig_word)
