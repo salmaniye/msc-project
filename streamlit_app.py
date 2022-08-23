@@ -148,7 +148,7 @@ with input_container:
 @st.experimental_memo
 def func_creating_fig1(df):
 	# creates plot of number of tweets and sentiment
-	fig = px.line(df, x='datetime', y='size', labels={
+	fig = px.line(df, x='date', y='size', labels={
 		'date':'Date',
 		'size':'Number of tweets',
 		'sentiment':'Sentiment'},
@@ -161,7 +161,7 @@ def func_creating_fig1(df):
 @st.experimental_memo
 def func_creating_fig2(df):
 	# creates plot of normalized sentiment with percentage
-	fig2 = px.area(df, x='datetime', y='sentiment percentage',labels={
+	fig2 = px.area(df, x='date', y='sentiment percentage',labels={
 		'date':'Date',
 		'sentiment percentage':'Sentiment (%)',
 		'sentiment':'Sentiment'},
@@ -233,8 +233,7 @@ slider_df = slider_df[slider_df["sentiment"].isin(options_sentiment)]
 
 # creates a dataframe of tweets created between dates chosen
 date_range_df = func_slider_df_all(game_dataset,date_range)
-game_dataset_clean = date_range_df[['text','date','sentiment scores','sentiment']]
-filtered_df = func_filtered_df(game_dataset_clean,options_sentiment)
+filtered_df = func_filtered_df(date_range_df,options_sentiment)
 if keyword_text:
 	filtered_df = func_keyword(filtered_df,keyword_text)
 
