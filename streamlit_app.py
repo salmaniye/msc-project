@@ -145,10 +145,11 @@ def call_metric_data(game_name):
 	with metrics_title:
 		st.markdown(f'Overall metrics of **{game_name}** (unaffected by options):' if index_no == 0 \
 	else f"Overall metrics difference of **{game_name}** from previous game: **{game_metadata[index_no-1]['name']}** (unaffected by options):")
+	sentiment_labels = ["Positive", "Neutral", "Negative"]
 	for i,column in enumerate([subcol1,subcol2,subcol3]):
 		with column:
 			delta = None if index_no == 0 else metrics_data.loc[index_no][i+1] - metrics_data.loc[index_no-1][i+1]
-			st.metric(label="Positive", value=f'{metrics_data.loc[index_no][i+1]:.2f}%', delta= None if index_no == 0 else f'{delta:.2f}%')
+			st.metric(label=sentiment_labels[i], value=f'{metrics_data.loc[index_no][i+1]:.2f}%', delta= None if index_no == 0 else f'{delta:.2f}%')
 
 with input_container:
 	# a dropdown for the user to choose the game to be displayed
