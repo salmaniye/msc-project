@@ -40,62 +40,38 @@ def call_dataset(game_name):
 	game_csv = game_name
 	data = pd.read_csv(f'datasets/tweets_datatset_{game_csv}.csv',lineterminator='\n')
 
-	data = data[data['text'].str.contains('I liked a YouTube')== False]
-	data = data[data['text'].str.contains('I liked a @YouTube video')== False]
-	data = data[data['text'].str.contains('I added a video to a @YouTube')== False]
-	data = data[data['text'].str.contains('I added a video to a YouTube')== False]
-	data = data[data['text'].str.contains('Giveaway')== False]
-
 	# removing \r in 'sentiment'
 	if 'sentiment\r' in data.columns:
 		data['sentiment'] = data['sentiment\r'].apply(lambda x: x.replace('\r',''))
 		data.drop(columns=['sentiment\r'],inplace=True)
-	
-	# removing first columns
-	data.drop(data.columns[0], axis=1, inplace=True)
 
 	# changing 'sentiment scores' from str to ndarray
 	data['sentiment scores'] = data['sentiment scores'].apply(lambda x: np.fromstring(x[1:-1], sep=' '))
 
-	# changing 'tweet id' from float64 to str
-	data['tweet id'] = data['tweet id'].apply(lambda x: str(int(x)))
-
-	# adding sentiment scores
-	sentiment_score = []
-	sentiment_confidence = []
-	for score in data['sentiment scores']:
-		sentiment_score.append(score.argmax())
-		sentiment_confidence.append(score[score.argmax()])
-	
-	data['sentiment score'] = sentiment_score
-	data['sentiment confidence'] = sentiment_confidence
-
 	# changing 'created at' date from str to datetime	
-	data['created at'] = data['created at'].apply(lambda x: x.removesuffix('+00:00'))
-	data['created at'] = data['created at'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
-	data['date'] = data['created at'].apply(lambda x: datetime.date(x))
+	data['datetime'] = data['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
 	
 	# sorting from earliest to latest
-	data.sort_values(by='created at', inplace=True)
+	data.sort_values(by='date', inplace=True)
 	data.reset_index(drop=True, inplace=True)
 	return data
 
 @st.experimental_memo
 def func_sentiment_per_day(df):
 	# for creating df with number of tweets
-	df = df.groupby(['sentiment','date'], as_index=False).size()
+	df = df.groupby(['sentiment','datetime'], as_index=False).size()
 	return df
 
 @st.experimental_memo
 def func_slider_df_size(df,date_range):
 	# for filtering dates of df with number of tweets
-	df = df[df['date'].between(date_range[0],date_range[1],inclusive='both')]
+	df = df[df['datetime'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
 @st.experimental_memo
 def func_slider_df_all(df,date_range):
 	# for filtering dates of df with original columns
-	df = df[df['date'].between(date_range[0],date_range[1],inclusive='both')]
+	df = df[df['datetime'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
 @st.experimental_memo
@@ -202,8 +178,8 @@ with input_container:
 
 # grouping sentiment per date
 sentiment_per_day = func_sentiment_per_day(game_dataset)
-min_date = sentiment_per_day['date'].min()
-max_date = sentiment_per_day['date'].max()
+min_date = sentiment_per_day['datetime'].min()
+max_date = sentiment_per_day['datetime'].max()
 
 date_range = list([0,0])
 
@@ -219,6 +195,9 @@ with inputs:
 	# start and end dates
 	date_range[0] = st.date_input('Select starting date:', min_date, min_date, max_date,key='dateinput1')
 	date_range[1] = st.date_input('Select end date:', max_date, min_date, max_date,key='dateinput2')
+
+	date_range[0] = pd.to_datetime(date_range[0])
+	date_range[1] = pd.to_datetime(date_range[1])
 
 	# options for filtering sentiment
 	options_sentiment = st.multiselect(label='Filter by sentiment (dropdown):',
@@ -243,7 +222,6 @@ with inputs:
 
 with input_container:
 	st.button("Reset options to default values", on_click=clear_inputs)
-
 
 if keyword_text:
 	game_dataset = func_keyword(game_dataset,keyword_text)
@@ -279,7 +257,7 @@ neutral_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Neutral'])/l
 negative_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Negative'])/len(filtered_df['sentiment'])
 
 with dataset:
-	st.markdown(f"""Displaying tweets from **{date_range[0]}** to **{date_range[1]}** on **{game_name}**  
+	st.markdown(f"""Displaying tweets from **{date_range[0].strftime("%Y-%m-%d")}** to **{date_range[1].strftime("%Y-%m-%d")}** on **{game_name}**  
 	Total Number of Tweets: **{total_number_of_tweets}**  
 	Positive: **{positive_percentage:.2f}%**, Neutral: **{neutral_percentage:.2f}%**, Negative: **{negative_percentage:.2f}%**""")
 
@@ -294,7 +272,7 @@ with common:
 	st.dataframe(filtered_df)
 
 def wordcloud_generator():
-	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
+	dataset_text = ' '.join(game_dataset['text'])
 
 	with open(f"metadata/custom_stopwords.txt","r") as file:
 		custom_stopwords = []
