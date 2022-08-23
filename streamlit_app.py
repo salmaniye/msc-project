@@ -288,7 +288,6 @@ with common:
 	st.markdown(f"##### Tweets on {game_name}")
 	st.dataframe(filtered_df)
 
-@st.experimental_memo
 def wordcloud_generator():
 	dataset_text = ' '.join(game_dataset['preprocessed tweets'])
 
