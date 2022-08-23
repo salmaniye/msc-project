@@ -244,7 +244,7 @@ fig = func_creating_fig1(slider_df)
 @st.experimental_memo
 def func_spd(df):
 	sentiment_total_pd = df.groupby(['datetime'], as_index=False).sum()
-	spd = df.merge(sentiment_total_pd, left_on = 'date', right_on='date')
+	spd = df.merge(sentiment_total_pd, left_on = 'datetime', right_on='datetime')
 	spd['sentiment percentage'] = 100*(spd['size_x']/spd['size_y'])
 	return spd
 
