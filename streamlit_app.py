@@ -140,9 +140,11 @@ games_dict_index = dict(zip(games_list,range(10)))
 # adding about game metadata and metrics
 metrics_data = pd.read_csv(f'datasets/games_metrics.csv')
 
-def call_metric_data(index_no):
+def call_metric_data(game_name):
+	index_no = games_dict_index[game_name]
 	with metrics_title:
-		st.markdown('Overall metrics' if index_no == 0 else f'Overall metrics difference from previous game (unaffected by options):')
+		st.markdown(f'Overall metrics of **{game_name}** (unaffected by options):' if index_no == 0 \
+	else f"Overall metrics difference of **{game_name}** from previous game: **{game_metadata[index_no-1]['name']}** (unaffected by options):")
 	for i,column in enumerate([subcol1,subcol2,subcol3]):
 		with column:
 			delta = None if index_no == 0 else metrics_data.loc[index_no][i+1] - metrics_data.loc[index_no-1][i+1]
@@ -164,7 +166,7 @@ with input_container:
 				st.markdown(entry['paragraph1'])
 				st.markdown(entry['paragraph2'])
 				st.markdown(entry['suggested_searches'])
-				call_metric_data(games_dict_index[game_name])
+				call_metric_data(game_name)
 
 @st.experimental_memo
 def func_creating_fig1(df):
