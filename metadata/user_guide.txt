@@ -2,6 +2,10 @@
 
 The control panel provides options to choose which game to display, starting and end dates, filtering by sentiment, and text search.
 
+If graphs are not showing properly, please try zooming out through your browser.
+
+The sidebar is resizable, to reset to default width, double-click the edge of the sidebar.
+
 ***
 
 ## Control Panel
@@ -17,7 +21,7 @@ Filtering by sentiment:
 
 Text search:
 - Type anything into the search box
-- There are **suggested searches** in the "About" section of each games
+- There are **suggested searches** in the "About" section of each game
 
 To submit all of the above selections, press the **Submit** button.
 

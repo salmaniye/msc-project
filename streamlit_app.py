@@ -10,6 +10,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 import json
+import pickle
 
 # set deafult layout to wide
 st.set_page_config(layout="wide")
@@ -17,6 +18,14 @@ header = st.container()
 # initializing containers
 with st.sidebar:
 	input_container, word_cloud, help_tab = st.tabs(["Control Panel", "WordCloud", "Help"])
+
+st.markdown("""
+<style>
+.bigger-font {
+    font-size:18px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 metrics = st.container()
 with metrics:
@@ -27,7 +36,9 @@ with metrics:
 
 dataset = st.container()
 col1, col2 = st.columns(2)
+plot_all = st.container()
 common = st.container()
+
 
 # loading metadata
 with open(f"metadata/games_metadata.json") as file:
@@ -100,6 +111,9 @@ with help_tab:
 	st.markdown("***")
 	st.markdown("All data, including the app, is stored on [this GitHub repository]") #(https://github.com/salmaniye/msc-project)
 	st.caption('by Salman Fatahillah/sxf181')
+	st.markdown("""
+
+		""")
 
 games_list = ['Pokémon X&Y', 'Pokémon Omega Ruby & Alpha Sapphire',
 			  'Pokémon Sun & Moon', 'Pokémon Ultra Sun & Ultra Moon',
@@ -133,13 +147,14 @@ with input_container:
 	st.caption(f'You have selected: {game_name}')
 
 	# About game section
-	with st.expander(f"About {game_name}"):
-		for entry in game_metadata:
-			if game_name == entry['name']:
+	
+	for entry in game_metadata:
+		if game_name == entry['name']:
+			st.image(entry['image'])
+			st.caption(entry['source'])
+			with st.expander(f"🎮 About {game_name}"):
 				st.markdown(f"""{entry['announced']}  
 					{entry['released']}""")
-				st.image(entry['image'])
-				st.caption(entry['source'])
 				st.markdown(entry['paragraph1'])
 				st.markdown(entry['paragraph2'])
 				st.markdown(entry['suggested_searches'])
@@ -148,30 +163,33 @@ with input_container:
 @st.experimental_memo
 def func_creating_fig1(df):
 	# creates plot of number of tweets and sentiment
-	fig = px.line(df, x='date', y='size', labels={
-		'date':'Date',
+	fig = px.line(df, x='datetime', y='size', labels={
+		'datetime':'Date',
 		'size':'Number of tweets',
 		'sentiment':'Sentiment'},
 		color='sentiment',
 		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'}) 
 		#['red', 'blue', 'green']
-	fig.update_layout(title_text=f"Number of tweets and their sentiment over time", title_x=0.5)
+	fig.update_layout(title_text=f"Number of tweets and their sentiment over time", title_x=0.5,
+		font=dict(size=16))
 	return fig
 
 @st.experimental_memo
 def func_creating_fig2(df):
 	# creates plot of normalized sentiment with percentage
-	fig2 = px.area(df, x='date', y='sentiment percentage',labels={
-		'date':'Date',
+	fig2 = px.area(df, x='datetime', y='sentiment percentage',labels={
+		'datetime':'Date',
 		'sentiment percentage':'Sentiment (%)',
 		'sentiment':'Sentiment'},
 		color='sentiment',
 		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'},
 		category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
-	fig2.update_layout(title_text=f"Normalized sentiment of tweets over time", title_x=0.5)
+	fig2.update_layout(title_text=f"Normalized sentiment of tweets over time", title_x=0.5,
+		font=dict(size=16))
 	return fig2
 
 game_dataset = call_dataset(games_dict[game_name])
+
 
 with input_container:
 	inputs = st.form(key='form',clear_on_submit=False)
@@ -222,6 +240,9 @@ with inputs:
 
 with input_container:
 	st.button("Reset options to default values", on_click=clear_inputs)
+	st.markdown("""
+
+		""")
 
 if keyword_text:
 	game_dataset = func_keyword(game_dataset,keyword_text)
@@ -233,8 +254,7 @@ slider_df = slider_df[slider_df["sentiment"].isin(options_sentiment)]
 
 # creates a dataframe of tweets created between dates chosen
 date_range_df = func_slider_df_all(game_dataset,date_range)
-game_dataset_clean = date_range_df[['text','date','sentiment scores','sentiment']]
-filtered_df = func_filtered_df(game_dataset_clean,options_sentiment)
+filtered_df = func_filtered_df(date_range_df,options_sentiment)
 if keyword_text:
 	filtered_df = func_keyword(filtered_df,keyword_text)
 
@@ -244,8 +264,8 @@ fig = func_creating_fig1(slider_df)
 # fig2. normalized sentiment area over time
 @st.experimental_memo
 def func_spd(df):
-	sentiment_total_pd = df.groupby(['date'], as_index=False).sum()
-	spd = df.merge(sentiment_total_pd, left_on = 'date', right_on='date')
+	sentiment_total_pd = df.groupby(['datetime'], as_index=False).sum()
+	spd = df.merge(sentiment_total_pd, left_on = 'datetime', right_on='datetime')
 	spd['sentiment percentage'] = 100*(spd['size_x']/spd['size_y'])
 	return spd
 
@@ -257,19 +277,29 @@ neutral_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Neutral'])/l
 negative_percentage = 100*len(filtered_df[filtered_df['sentiment']=='Negative'])/len(filtered_df['sentiment'])
 
 with dataset:
-	st.markdown(f"""Displaying tweets from **{date_range[0].strftime("%Y-%m-%d")}** to **{date_range[1].strftime("%Y-%m-%d")}** on **{game_name}**  
-	Total Number of Tweets: **{total_number_of_tweets}**  
-	Positive: **{positive_percentage:.2f}%**, Neutral: **{neutral_percentage:.2f}%**, Negative: **{negative_percentage:.2f}%**""")
+	st.markdown(f"""<p class="bigger-font">Displaying tweets from <b>{date_range[0].strftime("%Y-%m-%d")}</b>
+	to <b>{date_range[1].strftime("%Y-%m-%d")}</b> on <b>{game_name}</b><br>
+	Total Number of Tweets: <b>{total_number_of_tweets}</b><br>
+	Positive: <b>{positive_percentage:.2f}%</b>,
+	Neutral: <b>{neutral_percentage:.2f}%</b>,
+	Negative: <b>{negative_percentage:.2f}%</b></p>""",
+	unsafe_allow_html=True)
 
 	with col1:
 		st.write(fig)
 	with col2:
 		st.write(fig2)
 
+with plot_all:
+	fig_all = pickle.load(open('fig_all.pkl','rb'))
+	fig_all.update_layout(width=1400)
+	st.markdown(f"##### Plot of Number of Tweets from All Games over Time")
+	st.plotly_chart(fig_all)
+
 with common:
 	# display tweets
 	st.markdown(f"##### Tweets on {game_name}")
-	st.dataframe(filtered_df)
+	st.dataframe(filtered_df[['text','date','sentiment scores','sentiment']])
 
 def wordcloud_generator():
 	dataset_text = ' '.join(game_dataset['text'])
