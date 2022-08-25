@@ -109,7 +109,7 @@ with help_tab:
 	st.markdown(user_guide_text)
 	st.caption("[*Source*](https://docs.streamlit.io/library/api-reference/data/st.dataframe)")
 	st.markdown("***")
-	st.markdown("All data, including the app, is stored on [this GitHub repository]") #(https://github.com/salmaniye/msc-project)
+	st.markdown("All data, including the app, is stored on [this GitHub repository](https://github.com/salmaniye/msc-project).")
 	st.caption('by Salman Fatahillah/sxf181')
 	st.markdown("""
 
