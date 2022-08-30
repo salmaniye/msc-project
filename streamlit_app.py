@@ -36,8 +36,8 @@ with metrics:
 
 dataset = st.container()
 col1, col2 = st.columns(2)
-plot_all = st.container()
 common = st.container()
+plot_all = st.container()
 
 
 # loading metadata
@@ -290,16 +290,19 @@ with dataset:
 	with col2:
 		st.write(fig2)
 
-with plot_all:
-	fig_all = pickle.load(open('fig_all.pkl','rb'))
-	fig_all.update_layout(width=1400)
-	st.markdown(f"##### Plot of Number of Tweets from All Games over Time")
-	st.plotly_chart(fig_all)
 
 with common:
 	# display tweets
 	st.markdown(f"##### Tweets on {game_name}")
 	st.dataframe(filtered_df[['text','date','sentiment scores','sentiment']])
+
+
+with plot_all:
+	st.markdown("***")
+	fig_all = pickle.load(open('fig_all.pkl','rb'))
+	fig_all.update_layout(width=1400)
+	st.markdown(f"##### Plot of Number of Tweets from All Games over Time")
+	st.plotly_chart(fig_all)
 
 def wordcloud_generator():
 	dataset_text = ' '.join(game_dataset['text'])
