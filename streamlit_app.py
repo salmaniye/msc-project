@@ -328,6 +328,7 @@ def wordcloud_generator():
 
 with word_cloud:
 
-	st.caption('Word cloud of most common words between the date range and text search')
+	st.markdown('Word cloud of most common words between the date range and text search')
+	st.caption('The wordcloud is used to inspire you to find words to use in the text search in the Control Panel')
 	fig_word = wordcloud_generator()
 	st.pyplot(fig_word)
