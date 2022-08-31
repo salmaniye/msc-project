@@ -28,6 +28,12 @@ To submit all of the above selections, press the **Submit** button.
 ***
 
 ## Figures
+Plots:
+- When hovering over a plot, there will be extra options on the top right
+- You can download the plot as a PNG, zoom in and out, pan, autoscale, and reset axes
+- Click and drag an area to zoom in, double-click or double-tap to zoom back out
+- Click on labels on the legend to remove from the plot and click again to re-add to the plot
+
 Table Interactivity:
 - Column sorting: sort columns by clicking on their headers.
 - Column resizing: resize columns by dragging and dropping column header borders.
