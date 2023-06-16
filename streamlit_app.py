@@ -160,7 +160,7 @@ with input_container:
 				st.markdown(entry['suggested_searches'])
 				call_metric_data(game_name)
 
-@st.experimental_memo
+@st.cache_data
 def func_creating_fig1(df):
 	# creates plot of number of tweets and sentiment
 	fig = px.line(df, x='datetime', y='size', labels={
@@ -174,7 +174,7 @@ def func_creating_fig1(df):
 		font=dict(size=16))
 	return fig
 
-@st.experimental_memo
+@st.cache_data
 def func_creating_fig2(df):
 	# creates plot of normalized sentiment with percentage
 	fig2 = px.area(df, x='datetime', y='sentiment percentage',labels={
@@ -262,7 +262,7 @@ if keyword_text:
 fig = func_creating_fig1(slider_df)
 
 # fig2. normalized sentiment area over time
-@st.experimental_memo
+@st.cache_data
 def func_spd(df):
 	sentiment_total_pd = df.groupby(['datetime'], as_index=False).sum()
 	spd = df.merge(sentiment_total_pd, left_on = 'datetime', right_on='datetime')
