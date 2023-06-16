@@ -170,7 +170,7 @@ def func_creating_fig1(df):
 		color='sentiment',
 		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'}) 
 		#['red', 'blue', 'green']
-	fig.update_layout(title_text=f"Number of tweets and their sentiment over time", title_x=0.5,
+	fig.update_layout(title_text=f"Number of tweets and their sentiment over time",
 		font=dict(size=16))
 	return fig
 
@@ -184,7 +184,7 @@ def func_creating_fig2(df):
 		color='sentiment',
 		color_discrete_map={'Positive':'#109618','Neutral':'#3366CC','Negative':'#DC3912'},
 		category_orders={"sentiment": ["Negative", "Neutral", "Positive"]})
-	fig2.update_layout(title_text=f"Normalized sentiment of tweets over time", title_x=0.5,
+	fig2.update_layout(title_text=f"Normalized sentiment of tweets over time",
 		font=dict(size=16))
 	return fig2
 
