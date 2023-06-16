@@ -45,7 +45,7 @@ with open(f"metadata/games_metadata.json") as file:
     game_metadata = json.load(file)
 
 # functions
-@st.experimental_memo
+@st.cache_data
 def call_dataset(game_name):
 	# load data
 	game_csv = game_name
@@ -67,31 +67,31 @@ def call_dataset(game_name):
 	data.reset_index(drop=True, inplace=True)
 	return data
 
-@st.experimental_memo
+@st.cache_data
 def func_sentiment_per_day(df):
 	# for creating df with number of tweets
 	df = df.groupby(['sentiment','datetime'], as_index=False).size()
 	return df
 
-@st.experimental_memo
+@st.cache_data
 def func_slider_df_size(df,date_range):
 	# for filtering dates of df with number of tweets
 	df = df[df['datetime'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
-@st.experimental_memo
+@st.cache_data
 def func_slider_df_all(df,date_range):
 	# for filtering dates of df with original columns
 	df = df[df['datetime'].between(date_range[0],date_range[1],inclusive='both')]
 	return df
 
-@st.experimental_memo
+@st.cache_data
 def func_filtered_df(df,options_sentiment):
 	# for filtering sentiment
 	df = df[df["sentiment"].isin(options_sentiment)]
 	return df
 
-@st.experimental_memo
+@st.cache_data
 def func_keyword(df,key):
 	# for filtering with text search
 	df =  df[df['text'].str.contains(pat=key, case=False)==True]
